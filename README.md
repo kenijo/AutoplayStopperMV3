@@ -1,4 +1,4 @@
-# AutoplayStopperM3
+# AutoplayStopper (MV3)
 This is a Manifest v3 compatible fork of the defunct [AutoplayStopper](https://chromewebstore.google.com/detail/AutoplayStopper/ejddcgojdblidajhngkogefpkknnebdh) Chrome Extension.
 
 The code has been partially rewritten to more effectively block videos.
