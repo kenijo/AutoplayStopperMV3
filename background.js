@@ -1,3 +1,3 @@
 chrome.runtime.onInstalled.addListener(() => {
-  console.log("AutoplayStopper MV3 installed.");
+  console.log("AutoplayStopper (MV3) installed.");
 });
