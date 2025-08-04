@@ -10,3 +10,11 @@ Make video players (flash & html5) show video thumbnail instead of autoplaying.
 
 # Todo
 Add an option page to whitelist website to exclude from being blocked.
+
+# Enhanced Safe Browsing
+
+If you have Enhanced Safe Browsing enabled, you may see the following error message:
+
+![Proceed with caution](images/proceed_with_caution.png "Proceed with caution")
+
+![Enhanced Safe Browsing](images/enhanced_safe_browsing.png "Enhanced Safe Browsing")
