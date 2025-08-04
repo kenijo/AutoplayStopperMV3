@@ -15,6 +15,6 @@ Add an option page to whitelist website to exclude from being blocked.
 
 If you have Enhanced Safe Browsing enabled, you may see the following error message:
 
-![Proceed with caution](images/proceed_with_caution.png "Proceed with caution")
+![Proceed with caution](assets/proceed_with_caution.png "Proceed with caution")
 
-![Enhanced Safe Browsing](images/enhanced_safe_browsing.png "Enhanced Safe Browsing")
+![Enhanced Safe Browsing](assets/enhanced_safe_browsing.png "Enhanced Safe Browsing")
