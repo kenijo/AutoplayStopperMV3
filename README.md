@@ -1,3 +1,7 @@
+[![Chrome](assets/chrome.png "Chrome")](https://chromewebstore.google.com/detail/autoplaystopper-mv3/gcendpekmacfohmhhkbhejjfbepkkkib)
+
+This extension is compatible with all Chromium based browsers, icnluding: Brave, Chrome, Edge, Opera, Vivaldi, etc.
+
 # AutoplayStopper (MV3)
 This is a Manifest v3 compatible fork of the defunct [AutoplayStopper](https://chromewebstore.google.com/detail/AutoplayStopper/ejddcgojdblidajhngkogefpkknnebdh) Chrome Extension.
 
