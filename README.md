@@ -3,17 +3,16 @@
 This extension is compatible with all Chromium based browsers, icnluding: Brave, Chrome, Edge, Opera, Vivaldi, etc.
 
 # AutoplayStopper (MV3)
-This is a Manifest v3 compatible fork of the defunct [AutoplayStopper](https://chromewebstore.google.com/detail/AutoplayStopper/ejddcgojdblidajhngkogefpkknnebdh) Chrome Extension.
+AutoplayStopper Chrome Extension compatible with MV3
 
-The code has been partially rewritten to more effectively block videos.
+This is a much simpler version of the original [AutoplayStopper](https://chromewebstore.google.com/detail/AutoplayStopper/ejddcgojdblidajhngkogefpkknnebdh) Chrome Extension.
+
+Feel free to fork the original [AutoplayStopper](https://github.com/kenijo/AutoplayStopperMV2) repo and update it to Manifest V3.
 
 # Description
 Stops video autoplay gracefully.
 
-Make video players (flash & html5) show video thumbnail instead of autoplaying.
-
-# Todo
-Add an option page to whitelist website to exclude from being blocked.
+Make video players show video thumbnail instead of autoplaying.
 
 # Enhanced Safe Browsing
 
