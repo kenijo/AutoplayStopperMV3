@@ -7,7 +7,7 @@ AutoplayStopper Chrome Extension compatible with MV3
 
 This is a much simpler version of the original [AutoplayStopper](https://chromewebstore.google.com/detail/AutoplayStopper/ejddcgojdblidajhngkogefpkknnebdh) Chrome Extension.
 
-Feel free to fork the original [AutoplayStopper](https://github.com/kenijo/AutoplayStopperMV2) repo and update it to Manifest V3.
+Feel free to fork the original AutoplayStopper [repository](https://github.com/kenijo/AutoplayStopperMV2) and update it to Manifest V3.
 
 # Description
 Stops video autoplay gracefully.
