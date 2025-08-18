@@ -9,6 +9,15 @@ It is inspired by the original [AutoplayStopper](https://chromewebstore.google.c
 
 The original AutoplayStopper code is availble at the following [repository](https://github.com/kenijo/AutoplayStopperMV2).
 
+# Release Notes
+
+Version 1.1 - August 4, 2025
+• Initial release
+
+Version 2.0 - August 18, 2025
+• Rewrite extension to be stricted and cover a wider range of websites
+• Add the ability to turn the extension ON/OFF from the toolbar
+
 # Enhanced Safe Browsing
 
 If you have Enhanced Safe Browsing enabled, you may see the following error message:
