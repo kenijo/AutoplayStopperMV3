@@ -1,84 +1,145 @@
-(function () {
-  const mediaTags = ["video", "audio"];
+// -------------------------
+// Global Autoplay Blocker
+// -------------------------
 
-  // Override play() globally to block autoplay unless user-initiated
-  function overridePlay(media) {
-    if (media._playOverridden) return;
-    const originalPlay = media.play;
-    media.play = function () {
-      if (document.userActivation?.hasBeenActive) {
-        return originalPlay.call(this);
-      } else {
-        // console.warn("Blocked autoplay attempt:", media);
-        return Promise.reject("Autoplay blocked by extension.");
-      }
-    };
-    media._playOverridden = true;
-  }
+let userInteracted = false;
+let blockingEnabled = true;
 
-  function disableAutoplay(media) {
-    if (!media) return;
+// --- Load initial toggle state from storage ---
+if (chrome?.storage?.local) {
+    chrome.storage.local.get("autoplayBlockerEnabled", (data) => {
+        if (typeof data.autoplayBlockerEnabled === "boolean") {
+            blockingEnabled = data.autoplayBlockerEnabled;
+        }
+    });
+}
+
+// --- Listen for toggle updates from background.js ---
+if (chrome?.runtime?.onMessage) {
+    chrome.runtime.onMessage.addListener((msg) => {
+        if (msg && typeof msg.autoplayBlockerEnabled === "boolean") {
+            blockingEnabled = msg.autoplayBlockerEnabled;
+        }
+    });
+}
+
+// --- Detect first user interaction (to allow play after click/keypress) ---
+const markInteracted = () => { userInteracted = true; };
+["pointerdown", "mousedown", "touchstart", "keydown", "click"].forEach(evt => {
+    window.addEventListener(evt, markInteracted, { capture: true, once: true, passive: true });
+});
+
+// -------------------------
+// Media Scrubbing
+// -------------------------
+
+function scrubMedia(el) {
+    if (!(el instanceof HTMLMediaElement)) return;
+    if (!blockingEnabled) return;
+
+    // Remove autoplay/muted flags
+    el.autoplay = false;
+    el.muted = false;
+    el.removeAttribute("autoplay");
+    el.removeAttribute("muted");
+    el.removeAttribute("autostart");
+
+    // Pause if it already started
+    if (!el.paused && !userInteracted) {
+        try { el.pause(); } catch { }
+    }
+}
+
+function scrubIframe(el) {
+    if (!(el instanceof HTMLIFrameElement)) return;
+    if (!blockingEnabled) return;
+
+    const src = el.getAttribute("src");
+    if (!src) return;
     try {
-      media.autoplay = false;
-      media.preload = "none";
-      media.pause();
+        const u = new URL(src, location.href);
 
-      media.removeAttribute("autoplay");
-      overridePlay(media);
+        // Strip autoplay-related params
+        ["autoplay", "auto_play", "autostart", "muted", "playsinline"].forEach(p => {
+            u.searchParams.delete(p);
+        });
 
-      // Extra: block any autoplay after source change
-      media.addEventListener("loadedmetadata", () => {
-        media.pause();
-      });
-
-      // Prevent browser re-attempts (once)
-      const preventReattempt = (e) => {
-        if (!document.userActivation?.hasBeenActive) {
-          media.pause();
-          // console.warn("Autoplay attempt blocked; removing listener.");
-          media.removeEventListener("play", preventReattempt);
+        // Force autoplay=0 if param exists
+        if (u.searchParams.has("autoplay")) {
+            u.searchParams.set("autoplay", "0");
         }
-      };
-      media.addEventListener("play", preventReattempt);
 
-    } catch (err) {
-      // console.warn("Error disabling autoplay on element:", media, err);
-    }
-  }
-
-  function blockExistingMedia() {
-    mediaTags.forEach(tag => {
-      document.querySelectorAll(tag).forEach(disableAutoplay);
-    });
-  }
-
-  // Block media in new DOM nodes
-  const observer = new MutationObserver(mutations => {
-    mutations.forEach(m => {
-      m.addedNodes.forEach(node => {
-        if (node.nodeType !== 1) return;
-
-        if (mediaTags.includes(node.tagName?.toLowerCase())) {
-          disableAutoplay(node);
-        } else if (node.querySelectorAll) {
-          node.querySelectorAll(mediaTags.join(",")).forEach(disableAutoplay);
+        if (u.href !== src) {
+            el.setAttribute("src", u.href);
         }
-      });
-    });
-  });
-
-  function startObserver() {
-    if (document.body) {
-      observer.observe(document.body, {
-        childList: true,
-        subtree: true
-      });
-      blockExistingMedia();
-    } else {
-      // Retry if body not ready yet
-      setTimeout(startObserver, 50);
+    } catch {
+        // ignore malformed URLs
     }
-  }
+}
 
-  startObserver();
+// -------------------------
+// Mutation Observer
+// -------------------------
+
+const mo = new MutationObserver((muts) => {
+    for (const m of muts) {
+        for (const node of m.addedNodes) {
+            if (!(node instanceof Element)) continue;
+
+            if (node instanceof HTMLMediaElement) {
+                scrubMedia(node);
+            } else if (node instanceof HTMLIFrameElement) {
+                scrubIframe(node);
+            }
+
+            // Check descendants too
+            node.querySelectorAll?.("video, audio, iframe").forEach(el => {
+                if (el instanceof HTMLIFrameElement) scrubIframe(el);
+                else scrubMedia(el);
+            });
+        }
+    }
+});
+mo.observe(document.documentElement || document, { childList: true, subtree: true });
+
+// Initial sweep
+function initialSweep() {
+    if (!blockingEnabled) return;
+    document.querySelectorAll("video, audio, iframe").forEach(el => {
+        if (el instanceof HTMLIFrameElement) scrubIframe(el);
+        else scrubMedia(el);
+    });
+}
+initialSweep();
+
+// -------------------------
+// Block play() until interaction
+// -------------------------
+
+document.addEventListener("play", (e) => {
+    if (!blockingEnabled) return;
+    const el = e.target;
+    if (el instanceof HTMLMediaElement && !userInteracted) {
+        try { el.pause(); } catch { }
+    }
+}, true);
+
+// Patch play() to reject autoplay attempts
+(function patchPlay() {
+    const realPlay = HTMLMediaElement.prototype.play;
+    if (!realPlay || realPlay.__autoplayPatched) return;
+
+    function wrappedPlay(...args) {
+        if (!blockingEnabled) {
+            return realPlay.apply(this, args);
+        }
+        if (!userInteracted) {
+            const err = new DOMException("Autoplay blocked by extension", "NotAllowedError");
+            try { this.pause(); } catch { }
+            return Promise.reject(err);
+        }
+        return realPlay.apply(this, args);
+    }
+    wrappedPlay.__autoplayPatched = true;
+    HTMLMediaElement.prototype.play = wrappedPlay;
 })();

@@ -1,0 +1,89 @@
+[
+    {
+        "id": 1,
+        "priority": 1,
+        "action": {
+            "type": "redirect",
+            "redirect": {
+                "transform": {
+                    "queryTransform": {
+                        "removeParams": [
+                            "autoplay",
+                            "auto_play",
+                            "autostart",
+                            "muted",
+                            "playsinline"
+                        ]
+                    }
+                }
+            }
+        },
+        "condition": {
+            "urlFilter": "autoplay=",
+            "resourceTypes": [
+                "media",
+                "xmlhttprequest",
+                "sub_frame",
+                "script"
+            ]
+        }
+    },
+    {
+        "id": 2,
+        "priority": 1,
+        "action": {
+            "type": "redirect",
+            "redirect": {
+                "transform": {
+                    "queryTransform": {
+                        "removeParams": [
+                            "autoplay",
+                            "auto_play",
+                            "autostart",
+                            "muted",
+                            "playsinline"
+                        ]
+                    }
+                }
+            }
+        },
+        "condition": {
+            "urlFilter": "auto_play=",
+            "resourceTypes": [
+                "media",
+                "xmlhttprequest",
+                "sub_frame",
+                "script"
+            ]
+        }
+    },
+    {
+        "id": 3,
+        "priority": 1,
+        "action": {
+            "type": "redirect",
+            "redirect": {
+                "transform": {
+                    "queryTransform": {
+                        "removeParams": [
+                            "autoplay",
+                            "auto_play",
+                            "autostart",
+                            "muted",
+                            "playsinline"
+                        ]
+                    }
+                }
+            }
+        },
+        "condition": {
+            "urlFilter": "autostart=",
+            "resourceTypes": [
+                "media",
+                "xmlhttprequest",
+                "sub_frame",
+                "script"
+            ]
+        }
+    }
+]
