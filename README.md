@@ -3,16 +3,11 @@
 This extension is compatible with all Chromium based browsers, icnluding: Brave, Chrome, Edge, Opera, Vivaldi, etc.
 
 # AutoplayStopper (MV3)
-AutoplayStopper Chrome Extension compatible with MV3
+This extension blocks video and audio autoplay on all websites, with a toggle button.
 
-This is a much simpler version of the original [AutoplayStopper](https://chromewebstore.google.com/detail/AutoplayStopper/ejddcgojdblidajhngkogefpkknnebdh) Chrome Extension.
+It is inspired by the original [AutoplayStopper](https://chromewebstore.google.com/detail/AutoplayStopper/ejddcgojdblidajhngkogefpkknnebdh) Chrome Extension.
 
-Feel free to fork the original AutoplayStopper [repository](https://github.com/kenijo/AutoplayStopperMV2) and update it to Manifest V3.
-
-# Description
-Stops video autoplay gracefully.
-
-Make video players show video thumbnail instead of autoplaying.
+The original AutoplayStopper code is availble at the following [repository](https://github.com/kenijo/AutoplayStopperMV2).
 
 # Enhanced Safe Browsing
 
