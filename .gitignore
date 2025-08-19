@@ -4,6 +4,7 @@
 _metadata/*
 .vscode
 *.code-workspace
+AutoplayStopper(MV3).zip
 vendor/*
 
 # ============================================================
