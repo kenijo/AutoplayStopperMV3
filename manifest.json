@@ -31,8 +31,8 @@
         "rule_resources": [
             {
                 "enabled": true,
-                "id": "ruleset_1",
-                "path": "rules_1.json"
+                "id": "ruleset",
+                "path": "rules.json"
             }
         ]
     },
