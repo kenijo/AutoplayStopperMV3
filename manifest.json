@@ -53,8 +53,9 @@
     "manifest_version": 3,
     "name": "AutoplayStopper (MV3)",
     "permissions": [
-        "storage",
-        "declarativeNetRequestWithHostAccess"
+        "declarativeNetRequest",
+        "declarativeNetRequestWithHostAccess",
+        "storage"
     ],
-    "version": "2.0.0"
+    "version": "2.0"
 }

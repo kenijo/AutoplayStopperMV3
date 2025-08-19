@@ -8,81 +8,39 @@
                 "transform": {
                     "queryTransform": {
                         "removeParams": [
-                            "autoplay",
                             "auto_play",
+                            "autoplay",
+                            "autoPlay",
                             "autostart",
+                            "autoStart",
+                            "autostarts",
+                            "autoStarts",
+                            "autostartup",
+                            "autoStartup",
+                            "mute",
                             "muted",
-                            "playsinline"
+                            "play",
+                            "playing",
+                            "playnext",
+                            "playNext",
+                            "playsinline",
+                            "playsInline",
+                            "startmuted",
+                            "startMuted"
                         ]
                     }
                 }
             }
         },
         "condition": {
-            "urlFilter": "autoplay=",
+            "urlFilter": "*",
             "resourceTypes": [
+                "main_frame",
                 "media",
-                "xmlhttprequest",
+                "object",
+                "other",
                 "sub_frame",
-                "script"
-            ]
-        }
-    },
-    {
-        "id": 2,
-        "priority": 1,
-        "action": {
-            "type": "redirect",
-            "redirect": {
-                "transform": {
-                    "queryTransform": {
-                        "removeParams": [
-                            "autoplay",
-                            "auto_play",
-                            "autostart",
-                            "muted",
-                            "playsinline"
-                        ]
-                    }
-                }
-            }
-        },
-        "condition": {
-            "urlFilter": "auto_play=",
-            "resourceTypes": [
-                "media",
-                "xmlhttprequest",
-                "sub_frame",
-                "script"
-            ]
-        }
-    },
-    {
-        "id": 3,
-        "priority": 1,
-        "action": {
-            "type": "redirect",
-            "redirect": {
-                "transform": {
-                    "queryTransform": {
-                        "removeParams": [
-                            "autoplay",
-                            "auto_play",
-                            "autostart",
-                            "muted",
-                            "playsinline"
-                        ]
-                    }
-                }
-            }
-        },
-        "condition": {
-            "urlFilter": "autostart=",
-            "resourceTypes": [
-                "media",
-                "xmlhttprequest",
-                "sub_frame",
-                "script"
+                "xmlhttprequest"
             ]
         }
     }
