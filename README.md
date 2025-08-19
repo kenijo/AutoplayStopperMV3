@@ -1,24 +1,34 @@
+# AutoplayStopper (MV3)
+
 [![Chrome](assets/chrome.png "Chrome")](https://chromewebstore.google.com/detail/autoplaystopper-mv3/gcendpekmacfohmhhkbhejjfbepkkkib)
 
-This extension is compatible with all Chromium based browsers, icnluding: Brave, Chrome, Edge, Opera, Vivaldi, etc.
+This extension is compatible with all Chromium based browsers such as: Brave, Chrome, Edge, Opera, Vivaldi, etc.
 
-# AutoplayStopper (MV3)
-This extension blocks video and audio autoplay on all websites, with a toggle button.
+Some browsers such as such as [Brave](https://brave.com) or [Vivaldi](https://vivaldi.com), or even [Firefox](https://www.firefox.com) already have proper browser based autoplay blocking support. Just enable the browser's built-in autoplay blocking feature in the settings.
 
-It is inspired by the original [AutoplayStopper](https://chromewebstore.google.com/detail/AutoplayStopper/ejddcgojdblidajhngkogefpkknnebdh) Chrome Extension.
+## Description
 
-The original AutoplayStopper code is availble at the following [repository](https://github.com/kenijo/AutoplayStopperMV2).
+Blocks video and audio autoplay across websites. Can be turned ON/OFF from the browser toolbar.
 
-# Release Notes
+It is inspired by the original [AutoplayStopper](https://chromewebstore.google.com/detail/AutoplayStopper/ejddcgojdblidajhngkogefpkknnebdh) Chrome Extension. ([Repository of the original extension](https://github.com/kenijo/AutoplayStopperMV2))
 
-Version 1.1 - August 4, 2025
-• Initial release
+## Release Notes
 
-Version 2.0 - August 18, 2025
-• Rewrite extension to be stricted and cover a wider range of websites
-• Add the ability to turn the extension ON/OFF from the toolbar
+Version 2025.08.19
 
-# Enhanced Safe Browsing
+- Provide much stricter blocking of autoplay accross all websites (including msn.com and others)
+
+Version 2025.08.18 (2.0)
+
+- Rewrite extension to be stricted and cover a wider range of websites
+
+- Add the ability to turn the extension ON/OFF from the toolbar
+
+Version 2025.08.04 (1.1)
+
+- Initial release
+
+## Enhanced Safe Browsing
 
 If you have Enhanced Safe Browsing enabled, you may see the following error message:
 
