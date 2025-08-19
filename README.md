@@ -16,11 +16,11 @@ It is inspired by the original [AutoplayStopper](https://chromewebstore.google.c
 
 Version 2025.08.19
 
-- Provide much stricter blocking of autoplay accross all websites (including msn.com and others)
+- Provide much stricter blocking of autoplay across all websites (including msn.com and others)
 
 Version 2025.08.18 (2.0)
 
-- Rewrite extension to be stricted and cover a wider range of websites
+- Rewrite extension to be stricter and cover a wider range of websites
 
 - Add the ability to turn the extension ON/OFF from the toolbar
 
