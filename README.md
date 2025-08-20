@@ -16,6 +16,10 @@ It is inspired by the original [AutoplayStopper](https://chromewebstore.google.c
 
 Version 2025.08.19
 
+- Set video mute to false by default so that when a user plays a video, the sound comes on.
+
+Version 2025.08.19
+
 - Provide much stricter blocking of autoplay across all websites (including msn.com and others)
 
 Version 2025.08.18 (2.0)
