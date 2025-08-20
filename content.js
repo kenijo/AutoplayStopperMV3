@@ -53,16 +53,16 @@ function scrubMedia(el) {
     el.autoStarts = false;
     el.autostartup = false;
     el.autoStartup = false;
-    el.mute = true;
-    el.muted = true;
+    el.mute = false;
+    el.muted = false;
     el.play = false;
     el.playing = false;
     el.playnext = false;
     el.playNext = false;
     el.playsinline = false;
     el.playsInline = false;
-    el.startmuted = true;
-    el.startMuted = true;
+    el.startmuted = false;
+    el.startMuted = false;
 
     el.removeAttribute("auto_play");
     el.removeAttribute("autoplay");
