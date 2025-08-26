@@ -14,7 +14,7 @@ It is inspired by the original [AutoplayStopper](https://chromewebstore.google.c
 
 ## Release Notes
 
-Version 2025.08.19
+Version 2025.08.20
 
 - Set video mute to false by default so that when a user plays a video, the sound comes on.
 
