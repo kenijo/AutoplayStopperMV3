@@ -14,6 +14,13 @@ It is inspired by the original [AutoplayStopper](https://chromewebstore.google.c
 
 ## Release Notes
 
+Report issues at https://github.com/kenijo/AutoplayStopperMV3/issues
+
+Version 2025.09.17
+
+- Add on option page to whitelist domains.
+- Disabled any reference to muting videos to respect the original website intended behavior and to avoid any confusion.
+
 Version 2025.08.20
 
 - Set video mute to false by default so that when a user plays a video, the sound comes on.
