@@ -62,16 +62,16 @@ chrome.storage.local.get({ whitelist: [] }, (data) => {
         el.autoStarts = false;
         el.autostartup = false;
         el.autoStartup = false;
-        el.mute = false;
-        el.muted = false;
+        //el.mute = false;
+        //el.muted = false;
         el.play = false;
         el.playing = false;
         el.playnext = false;
         el.playNext = false;
         el.playsinline = false;
         el.playsInline = false;
-        el.startmuted = false;
-        el.startMuted = false;
+        //el.startmuted = false;
+        //el.startMuted = false;
 
         el.removeAttribute("auto_play");
         el.removeAttribute("autoplay");
@@ -82,16 +82,16 @@ chrome.storage.local.get({ whitelist: [] }, (data) => {
         el.removeAttribute("autoStarts");
         el.removeAttribute("autostartup");
         el.removeAttribute("autoStartup");
-        el.removeAttribute("mute");
-        el.removeAttribute("muted");
+        //el.removeAttribute("mute");
+        //el.removeAttribute("muted");
         el.removeAttribute("play");
         el.removeAttribute("playing");
         el.removeAttribute("playnext");
         el.removeAttribute("playNext");
         el.removeAttribute("playsinline");
         el.removeAttribute("playsInline");
-        el.removeAttribute("startmuted");
-        el.removeAttribute("startMuted");
+        //el.removeAttribute("startmuted");
+        //el.removeAttribute("startMuted");
 
         if (!el.paused && !userInteracted) {
             try { el.pause(); } catch { }
