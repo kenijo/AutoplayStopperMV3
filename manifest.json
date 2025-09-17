@@ -52,6 +52,7 @@
     },
     "manifest_version": 3,
     "name": "AutoplayStopper (MV3)",
+    "options_page": "options/options.html",
     "permissions": [
         "declarativeNetRequest",
         "declarativeNetRequestWithHostAccess",

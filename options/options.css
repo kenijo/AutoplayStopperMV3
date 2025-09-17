@@ -1,0 +1,103 @@
+body {
+    font-family: Roboto, Arial, sans-serif;
+    margin: 16px;
+    background: #fafafa;
+    color: #212121;
+    font-size: 13px;
+}
+
+h1 {
+    font-size: 1.2rem;
+    margin-bottom: 8px;
+}
+
+p {
+    margin: 4px 0 12px 0;
+    font-size: 12px;
+}
+
+.input-row,
+.search-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+input[type=text] {
+    flex: 1;
+    padding: 6px 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+input[type=text]:focus {
+    border: 1px solid #6200ee;
+    box-shadow: 0 0 0 2px rgba(98, 0, 238, 0.2);
+    outline: none;
+}
+
+button {
+    margin-left: 6px;
+    padding: 5px 10px;
+    background-color: #6200ee;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+button:hover {
+    background-color: #4500b5;
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    max-height: 250px;
+    overflow-y: auto;
+}
+
+li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 6px;
+    margin-bottom: 4px;
+    background: white;
+    border-radius: 3px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    font-size: 12px;
+}
+
+li button {
+    background: #e53935;
+    padding: 3px 8px;
+    font-size: 11px;
+}
+
+li button:hover {
+    background: #ab000d;
+}
+
+#message {
+    font-size: 0.8em;
+    min-height: 14px;
+    margin-bottom: 4px;
+    color: red;
+}
+
+button span.ripple {
+    pointer-events: none;
+}
+
+@keyframes ripple {
+    to {
+        transform: scale(4);
+        opacity: 0;
+    }
+}
