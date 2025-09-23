@@ -1,30 +1,50 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
     <head>
         <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>AutoplayStopper Options</title>
         <link rel="stylesheet" href="options.css">
     </head>
 
     <body>
-        <h1>AutoplayStopper Options</h1>
-        <p>Domains listed here will <strong>not</strong> be blocked.</p>
+        <div class="container">
+            <header>
+                <h1>AutoplayStopper Options</h1>
+                <span id="appVersion" class="version"></span>
+            </header>
 
-        <div class="input-row">
-            <input type="text" id="domainInput" placeholder="example.com">
-            <button id="addDomain">Add</button>
+            <section class="controls">
+                <div class="export-import">
+                    <button id="exportBtn" class="btn btn-primary">Export Settings</button>
+                    <button id="importBtn" class="btn btn-primary">Import Settings</button>
+                    <input type="file" id="importFile" accept=".json" style="display:none">
+                    <button id="resetBtn" class="btn btn-danger">Reset Whitelist</button>
+                </div>
+            </section>
+
+            <section class="whitelist">
+                <h2>Whitelist Management</h2>
+                <p>Add domains to exclude from autoplay blocking (e.g., "youtube.com")</p>
+
+                <div class="input-group">
+                    <input type="search" id="domainInput" placeholder="example.com" aria-label="Domain to whitelist">
+                    <button id="addDomain" class="btn btn-primary">Add Domain</button>
+                </div>
+
+                <div class="status-message" id="message" role="alert"></div>
+
+                <div class="search-group">
+                    <input type="search" id="searchInput" placeholder="Search domains..."
+                        aria-label="Search whitelisted domains">
+                </div>
+
+                <div class="domain-list">
+                    <ul id="domainList" aria-label="Whitelisted domains"></ul>
+                </div>
+            </section>
         </div>
-
-        <p id="message"></p>
-
-        <h1>Whitelist</h1>
-
-        <div class="search-row">
-            <input type="text" id="searchInput" placeholder="Search domains...">
-        </div>
-
-        <ul id="domainList"></ul>
 
         <script src="options.js"></script>
     </body>

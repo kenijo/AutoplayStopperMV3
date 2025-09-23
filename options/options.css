@@ -1,97 +1,190 @@
+:root {
+    --color-background: #fff;
+    --color-border: #ddd;
+    --color-danger: 191, 97, 106;
+    --color-hover: #eee;
+    --color-light: #fafafa;
+    --color-primary: 129, 161, 193;
+    --color-text: #000;
+    --font_size: 12px;
+    --radius: 4px;
+    --shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
 body {
-    font-family: Roboto, Arial, sans-serif;
-    margin: 16px;
-    background: #fafafa;
-    color: #212121;
-    font-size: 13px;
+    font-family: 'Roboto', 'Arial', sans-serif;
+    margin: 0;
+    padding: 24px;
+    background: var(--color-light);
+    color: var(--color-text);
+    font-size: var(--font_size);
+    display: flex;
+    justify-content: center;
+    min-height: 50vh;
+}
+
+.container {
+    width: 100%;
+    max-width: 500px;
+    background: var(--color-background);
+    padding: 20px 24px;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
 }
 
 h1 {
     font-size: 1.2rem;
-    margin-bottom: 8px;
+    margin: 0;
+}
+
+.version {
+    color: rgba(var(--color-primary), 1);
+    font-size: var(--font_size);
+}
+
+section {
+    margin-bottom: 20px;
+}
+
+h2 {
+    font-size: 1rem;
+    margin: 0 0 8px 0;
+    color: var(--color-text);
 }
 
 p {
     margin: 4px 0 12px 0;
-    font-size: 12px;
+    font-size: var(--font_size);
+    line-height: 1.4;
 }
 
-.input-row,
-.search-row {
+/* Form Elements */
+.input-group,
+.search-group {
     display: flex;
-    align-items: center;
-    margin-bottom: 8px;
+    gap: 8px;
+    margin-bottom: 12px;
 }
 
-input[type=text] {
+input[type="text"],
+input[type="search"] {
     flex: 1;
     padding: 6px 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 12px;
+    border: 1px solid rgba(var(--color-primary), 0.4);
+    border-radius: var(--radius);
+    font-size: var(--font_size);
+    transition: all 0.2s ease;
 }
 
-input[type=text]:focus {
-    border: 1px solid #6200ee;
-    box-shadow: 0 0 0 2px rgba(98, 0, 238, 0.2);
+input[type="text"]:focus,
+input[type="search"]:focus {
+    border-color: rgba(var(--color-primary), 0.8);
+    box-shadow: 0 0 0 2px rgba(var(--color-primary), 0.2);
     outline: none;
 }
 
-button {
-    margin-left: 6px;
+/* Buttons */
+.btn {
     padding: 5px 10px;
-    background-color: #6200ee;
-    color: white;
     border: none;
-    border-radius: 4px;
-    font-size: 12px;
+    border-radius: var(--radius);
+    font-size: var(--font_size);
     cursor: pointer;
-    position: relative;
-    overflow: hidden;
+    transition: background-color 0.2s ease;
 }
 
-button:hover {
-    background-color: #4500b5;
+.btn-primary {
+    background-color: rgba(var(--color-primary), 1);
+    color: var(--color-light);
 }
 
-ul {
+.btn-primary:hover {
+    background-color: rgba(var(--color-primary), 0.8);
+}
+
+.btn-danger {
+    background-color: rgba(var(--color-danger), 1);
+    color: var(--color-light);
+}
+
+.btn-danger:hover {
+    background-color: rgba(var(--color-danger), 0.8);
+}
+
+.btn-icon {
+    background-color: rgba(var(--color-primary), 1);
+    color: var(--color-light);
+    padding: 4px 8px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-icon:hover {
+    background-color: rgba(var(--color-primary), 0.8);
+}
+
+/* Controls Section */
+.controls {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.export-import {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+}
+
+/* Domain List */
+.domain-list {
+    margin-top: 12px;
+}
+
+#domainList {
     list-style: none;
     padding: 0;
     margin: 0;
     max-height: 250px;
     overflow-y: auto;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    background: var(--color-background);
 }
 
-li {
+#domainList li {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 4px 6px;
-    margin-bottom: 4px;
-    background: white;
-    border-radius: 3px;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-    font-size: 12px;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--color-border);
+    font-size: var(--font_size);
 }
 
-li button {
-    background: #e53935;
-    padding: 3px 8px;
-    font-size: 11px;
+#domainList li:last-child {
+    border-bottom: none;
 }
 
-li button:hover {
-    background: #ab000d;
+/* Status Message */
+.status-message {
+    min-height: 16px;
+    font-size: var(--font_size);
+    margin: 4px 0;
+    color: rgba(var(--color-danger), 1);
 }
 
-#message {
-    font-size: 0.8em;
-    min-height: 14px;
-    margin-bottom: 4px;
-    color: red;
-}
-
-button span.ripple {
+/* Ripple Effect */
+.btn span.ripple {
     pointer-events: none;
 }
 

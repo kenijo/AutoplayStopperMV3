@@ -1,128 +1,307 @@
-const domainInput = document.getElementById("domainInput");
-const addButton = document.getElementById("addDomain");
-const domainList = document.getElementById("domainList");
-const message = document.getElementById("message");
-const searchInput = document.getElementById("searchInput");
+// -------------------------
+// Options Page
+// -------------------------
 
+// DOM Elements
+const elements = {
+    addButton: document.getElementById("addDomain"),
+    domainInput: document.getElementById("domainInput"),
+    domainList: document.getElementById("domainList"),
+    exportBtn: document.getElementById("exportBtn"),
+    importBtn: document.getElementById("importBtn"),
+    importFile: document.getElementById("importFile"),
+    message: document.getElementById("message"),
+    resetBtn: document.getElementById("resetBtn"),
+    searchInput: document.getElementById("searchInput")
+};
+
+// State
 let currentDomains = [];
 
-// Ripple effect
-function addRipple(button) {
+// -------------------------
+// Utilities
+// -------------------------
+
+/**
+ * Creates ripple effect on button click
+ * @param {HTMLElement} button - Button element to add ripple to
+ */
+function setupRipple(button) {
     button.style.position = "relative";
     button.style.overflow = "hidden";
-    button.addEventListener("click", function (e) {
-        const circle = document.createElement("span");
+
+    button.addEventListener("click", (e) => {
+        const ripple = document.createElement("span");
         const diameter = Math.max(button.clientWidth, button.clientHeight);
         const radius = diameter / 2;
 
-        circle.style.width = circle.style.height = `${diameter}px`;
-        circle.style.left = `${e.clientX - button.offsetLeft - radius}px`;
-        circle.style.top = `${e.clientY - button.offsetTop - radius}px`;
-        circle.style.position = "absolute";
-        circle.style.borderRadius = "50%";
-        circle.style.backgroundColor = "rgba(255, 255, 255, 0.6)";
-        circle.style.transform = "scale(0)";
-        circle.style.animation = "ripple 600ms linear";
-        circle.classList.add("ripple");
+        Object.assign(ripple.style, {
+            width: `${diameter}px`,
+            height: `${diameter}px`,
+            left: `${e.clientX - button.offsetLeft - radius}px`,
+            top: `${e.clientY - button.offsetTop - radius}px`,
+            position: "absolute",
+            borderRadius: "50%",
+            backgroundColor: "rgba(255, 255, 255, 0.6)",
+            transform: "scale(0)",
+            animation: "ripple 600ms linear",
+            pointerEvents: "none"
+        });
 
-        const oldRipple = button.getElementsByClassName("ripple")[0];
-        if (oldRipple) oldRipple.remove();
+        ripple.classList.add("ripple");
+        button.appendChild(ripple);
 
-        button.appendChild(circle);
+        // Clean up after animation
+        setTimeout(() => ripple.remove(), 600);
     });
 }
 
-// Inject ripple CSS
-const style = document.createElement("style");
-style.textContent = `
-@keyframes ripple {
-  to { transform: scale(4); opacity: 0; }
-}
-button span.ripple { pointer-events: none; }
-`;
-document.head.appendChild(style);
-
-// Domain validation
+/**
+ * Validates domain format
+ * @param {string} domain - Domain to validate
+ * @returns {boolean} True if valid domain
+ */
 function isValidDomain(domain) {
-    const domainRegex = /^(?!-)([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/;
-    return domainRegex.test(domain);
+    return /^(?!-)([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/.test(domain);
 }
 
-// Show messages
+/**
+ * Shows temporary message
+ * @param {string} text - Message text
+ * @param {boolean} [isError=true] - Whether message is error
+ */
 function showMessage(text, isError = true) {
-    message.style.color = isError ? "red" : "green";
-    message.textContent = text;
-    setTimeout(() => { message.textContent = ""; }, 2500);
+    elements.message.style.color = isError ? "var(--color-danger)" : "green";
+    elements.message.textContent = text;
+
+    clearTimeout(elements.message.timer);
+    elements.message.timer = setTimeout(() => {
+        elements.message.textContent = "";
+    }, 2500);
 }
 
-// Render whitelist (with optional filter)
-function renderList(domains, filter = "") {
-    domainList.innerHTML = "";
+// -------------------------
+// Domain Management
+// -------------------------
 
-    const filtered = domains
+/**
+ * Renders domain list with optional filter
+ * @param {string} [filter=""] - Filter string
+ */
+function renderDomainList(filter = "") {
+    elements.domainList.innerHTML = "";
+
+    const filtered = [...currentDomains]
         .filter(d => d.toLowerCase().includes(filter.toLowerCase()))
         .sort((a, b) => a.localeCompare(b));
 
-    filtered.forEach((domain, idx) => {
+    filtered.forEach(domain => {
         const li = document.createElement("li");
         const span = document.createElement("span");
         span.textContent = domain;
 
         const removeBtn = document.createElement("button");
         removeBtn.textContent = "Remove";
-        addRipple(removeBtn);
-        removeBtn.addEventListener("click", () => {
-            const newDomains = currentDomains.filter(d => d !== domain);
-            chrome.storage.local.set({ whitelist: newDomains }, () => {
-                currentDomains = newDomains;
-                renderList(currentDomains, searchInput.value);
-                showMessage(`Removed ${domain}`, false);
-            });
-        });
+        removeBtn.className = "btn btn-danger";
+        setupRipple(removeBtn);
 
-        li.appendChild(span);
-        li.appendChild(removeBtn);
-        domainList.appendChild(li);
+        removeBtn.addEventListener("click", () => removeDomain(domain));
+
+        li.append(span, removeBtn);
+        elements.domainList.appendChild(li);
     });
 }
 
-// Load saved whitelist
-chrome.storage.local.get({ whitelist: [] }, (data) => {
-    currentDomains = data.whitelist;
-    renderList(currentDomains);
-});
+/**
+ * Removes domain from whitelist
+ * @param {string} domain - Domain to remove
+ */
+function removeDomain(domain) {
+    const newDomains = currentDomains.filter(d => d !== domain);
+    updateWhitelist(newDomains);
+    showMessage(`Removed ${domain}`, false);
+}
 
-// Add new domain
-addButton.addEventListener("click", () => {
-    let domain = domainInput.value.trim();
+/**
+ * Adds domain to whitelist
+ */
+function addDomain() {
+    let domain = elements.domainInput.value.trim();
     if (!domain) {
-        showMessage("Please enter a domain.");
+        showMessage("Please enter a domain");
         return;
     }
 
-    domain = domain.replace(/^https?:\/\//, "").replace(/\/.*$/, "");
+    // Clean domain input
+    domain = domain
+        .replace(/^https?:\/\//, "")
+        .replace(/\/.*$/, "");
+
     if (!isValidDomain(domain)) {
-        showMessage("Invalid domain format.");
+        showMessage("Invalid domain format (e.g., example.com)");
         return;
     }
 
     if (currentDomains.includes(domain)) {
-        showMessage("This domain is already whitelisted.");
+        showMessage("Domain already whitelisted");
         return;
     }
 
-    currentDomains.push(domain);
-    chrome.storage.local.set({ whitelist: currentDomains }, () => {
-        renderList(currentDomains, searchInput.value);
-        showMessage(`Added ${domain}`, false);
-        domainInput.value = "";
+    updateWhitelist([...currentDomains, domain]);
+    elements.domainInput.value = "";
+    showMessage(`Added ${domain}`, false);
+}
+
+/**
+ * Updates whitelist in storage and UI
+ * @param {string[]} domains - New domain list
+ */
+function updateWhitelist(domains) {
+    currentDomains = domains;
+    chrome.storage.local.set({ whitelist: domains }, () => {
+        renderDomainList(elements.searchInput.value);
+    });
+}
+
+// -------------------------
+// Import/Export
+// -------------------------
+
+/**
+ * Exports whitelist to JSON file
+ */
+function exportWhitelist() {
+    const validDomains = currentDomains
+        .map(d => typeof d === "string" ? d.trim() : "")
+        .filter(isValidDomain);
+
+    if (validDomains.length === 0) {
+        showMessage("No valid domains to export");
+        return;
+    }
+
+    const blob = new Blob([JSON.stringify(validDomains, null, 2)], {
+        type: "application/json"
+    });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "autoplay-blocker-whitelist.json";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    showMessage("Whitelist exported", false);
+}
+
+/**
+ * Handles file import
+ * @param {Event} e - Change event
+ */
+function handleImport(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+        try {
+            const imported = JSON.parse(event.target.result);
+            if (!Array.isArray(imported)) {
+                showMessage("Invalid format (must be JSON array)");
+                return;
+            }
+
+            const validDomains = imported
+                .map(d => typeof d === "string" ? d.trim() : "")
+                .filter(isValidDomain);
+
+            if (validDomains.length === 0) {
+                showMessage("No valid domains found");
+                return;
+            }
+
+            const shouldOverwrite = confirm(
+                "Overwrite current whitelist?\n\n" +
+                "OK = Overwrite, Cancel = Merge"
+            );
+
+            const newList = shouldOverwrite
+                ? validDomains
+                : [...new Set([...currentDomains, ...validDomains])];
+
+            updateWhitelist(newList.sort());
+            showMessage(shouldOverwrite ? "Whitelist overwritten" : "Whitelist merged", false);
+        } catch {
+            showMessage("Import failed (invalid file)");
+        }
+    };
+    reader.readAsText(file);
+    e.target.value = ""; // Reset file input
+}
+
+// -------------------------
+// Event Listeners
+// -------------------------
+
+// Initialize
+document.addEventListener("DOMContentLoaded", () => {
+    // Load saved whitelist
+    chrome.storage.local.get({ whitelist: [] }, ({ whitelist }) => {
+        currentDomains = whitelist;
+        renderDomainList();
+    });
+
+    // Retrieve extension version
+    const version = chrome.runtime.getManifest().version;
+    document.getElementById("appVersion").textContent = `v${version}`;
+
+    // Setup ripple effects
+    setupRipple(elements.addButton);
+    setupRipple(elements.importBtn);
+    setupRipple(elements.exportBtn);
+    setupRipple(elements.resetBtn);
+
+    // Add domain
+    elements.addButton.addEventListener("click", addDomain);
+
+    // Import/export
+    elements.exportBtn.addEventListener("click", exportWhitelist);
+    elements.importBtn.addEventListener("click", () => elements.importFile.click());
+    elements.importFile.addEventListener("change", handleImport);
+
+    // Reset whitelist
+    elements.resetBtn.addEventListener("click", () => {
+        if (confirm("Clear entire whitelist? This cannot be undone.")) {
+            updateWhitelist([]);
+            showMessage("Whitelist cleared", false);
+        }
+    });
+
+    // Search functionality
+    elements.searchInput.addEventListener("input", () =>
+        renderDomainList(elements.searchInput.value));
+
+    // Keyboard shortcuts
+    elements.searchInput.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+            e.target.value = "";
+            renderDomainList();
+        }
+    });
+
+    elements.domainInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") addDomain();
+        if (e.key === "Escape") e.target.value = "";
+    });
+
+    // Global shortcuts
+    document.addEventListener("keydown", (e) => {
+        if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
+        if (e.key === "/") {
+            e.preventDefault();
+            elements.searchInput.focus();
+        }
     });
 });
-
-// Search filter
-searchInput.addEventListener("input", () => {
-    renderList(currentDomains, searchInput.value);
-});
-
-// Apply ripple to Add button
-addRipple(addButton);
