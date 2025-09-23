@@ -1,0 +1,3 @@
+#!/bin/sh
+node .tasks/updateVersion.js
+git add manifest.json
