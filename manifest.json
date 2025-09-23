@@ -1,14 +1,14 @@
 ﻿{
     "action": {
         "default_icon": {
-            "16": "icons/icon16.png",
-            "24": "icons/icon24.png",
-            "32": "icons/icon32.png",
-            "48": "icons/icon48.png",
-            "64": "icons/icon64.png",
-            "128": "icons/icon128.png",
-            "256": "icons/icon256.png",
-            "512": "icons/icon512.png"
+            "16": "icons/icon16_enabled.png",
+            "24": "icons/icon24_enabled.png",
+            "32": "icons/icon32_enabled.png",
+            "48": "icons/icon48_enabled.png",
+            "64": "icons/icon64_enabled.png",
+            "128": "icons/icon128_enabled.png",
+            "256": "icons/icon256_enabled.png",
+            "512": "icons/icon512_enabled.png"
         },
         "default_title": "Toggle AutoplayStopper"
     },
@@ -41,14 +41,14 @@
         "<all_urls>"
     ],
     "icons": {
-        "16": "icons/icon16.png",
-        "24": "icons/icon24.png",
-        "32": "icons/icon32.png",
-        "48": "icons/icon48.png",
-        "64": "icons/icon64.png",
-        "128": "icons/icon128.png",
-        "256": "icons/icon256.png",
-        "512": "icons/icon512.png"
+        "16": "icons/icon16_enabled.png",
+        "24": "icons/icon24_enabled.png",
+        "32": "icons/icon32_enabled.png",
+        "48": "icons/icon48_enabled.png",
+        "64": "icons/icon64_enabled.png",
+        "128": "icons/icon128_enabled.png",
+        "256": "icons/icon256_enabled.png",
+        "512": "icons/icon512_enabled.png"
     },
     "manifest_version": 3,
     "name": "AutoplayStopper (MV3)",

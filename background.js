@@ -4,14 +4,14 @@
 
 const ICON_PATHS = {
     enabled: {
-        "16" : "icons/icon16.png",
-        "24" : "icons/icon24.png",
-        "32" : "icons/icon32.png",
-        "48" : "icons/icon48.png",
-        "64" : "icons/icon64.png",
-        "128": "icons/icon128.png",
-        "256": "icons/icon256.png",
-        "512": "icons/icon512.png"
+        "16" : "icons/icon16_enabled.png",
+        "24" : "icons/icon24_enabled.png",
+        "32" : "icons/icon32_enabled.png",
+        "48" : "icons/icon48_enabled.png",
+        "64" : "icons/icon64_enabled.png",
+        "128": "icons/icon128_enabled.png",
+        "256": "icons/icon256_enabled.png",
+        "512": "icons/icon512_enabled.png"
     },
     disabled: {
         "16" : "icons/icon16_disabled.png",
@@ -22,6 +22,17 @@ const ICON_PATHS = {
         "128": "icons/icon128_disabled.png",
         "256": "icons/icon256_disabled.png",
         "512": "icons/icon512_disabled.png"
+    }
+    ,
+    whitelisted: {
+        "16" : "icons/icon16_whitelisted.png",
+        "24" : "icons/icon24_whitelisted.png",
+        "32" : "icons/icon32_whitelisted.png",
+        "48" : "icons/icon48_whitelisted.png",
+        "64" : "icons/icon64_whitelisted.png",
+        "128": "icons/icon128_whitelisted.png",
+        "256": "icons/icon256_whitelisted.png",
+        "512": "icons/icon512_whitelisted.png"
     }
 };
 
