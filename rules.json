@@ -17,16 +17,12 @@
                             "autoStarts",
                             "autostartup",
                             "autoStartup",
-                            "mute",
-                            "muted",
                             "play",
                             "playing",
                             "playnext",
                             "playNext",
                             "playsinline",
-                            "playsInline",
-                            "startmuted",
-                            "startMuted"
+                            "playsInline"
                         ]
                     }
                 }
