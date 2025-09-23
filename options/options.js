@@ -187,7 +187,7 @@ function exportWhitelist() {
 
     const a = document.createElement("a");
     a.href = url;
-    a.download = "autoplay-blocker-whitelist.json";
+    a.download = "autoplaystopper-whitelist.json";
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);

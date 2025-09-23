@@ -1,12 +1,12 @@
 // -------------------------
-// Global Autoplay Blocker with Shadow DOM support
+// Global AutoplayStopper with Shadow DOM support
 // -------------------------
 
 // Early return if whitelisted
 chrome.storage.local.get({ whitelist: [] }, ({ whitelist }) => {
     const hostname = location.hostname;
     if (whitelist.some(domain => hostname.endsWith(domain))) {
-        console.debug("[AutoplayBlocker] Disabled on whitelisted site:", hostname);
+        console.debug("[AutoplayStopper] Disabled on whitelisted site:", hostname);
         return;
     }
 
