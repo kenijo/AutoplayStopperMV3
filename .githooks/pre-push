@@ -9,6 +9,9 @@ git add manifest.json
 # Commit the changes
 git commit -m "Update Version Number"
 
+# Remove old zip file
+git rm "AutoplayStopper(MV3).zip"
+
 # Create zip
 git archive -o "AutoplayStopper(MV3).zip" main
 
