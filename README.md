@@ -8,13 +8,18 @@ Some browsers such as such as [Brave](https://brave.com) or [Vivaldi](https://vi
 
 ## Description
 
-Blocks video and audio autoplay across websites. Can be turned ON/OFF from the browser toolbar.
+Blocks video and audio autoplay across websites.
 
 It is inspired by the original [AutoplayStopper](https://chromewebstore.google.com/detail/AutoplayStopper/ejddcgojdblidajhngkogefpkknnebdh) Chrome Extension. ([Repository of the original extension](https://github.com/kenijo/AutoplayStopperMV2))
 
 ## Release Notes
 
 Report issues at https://github.com/kenijo/AutoplayStopperMV3/issues
+
+Version 2025.09.22
+
+- Add configuration export/import as JSON
+- Cleanup the options page UI
 
 Version 2025.09.17
 
