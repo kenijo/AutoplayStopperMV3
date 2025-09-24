@@ -1,0 +1,10 @@
+#!/bin/sh
+
+# Update version in manifest.json before pushing
+node .tasks/updateVersion.js
+
+# Add manifest.jon to staging
+git add manifest.json
+
+# Commit the changes
+git commit -m "Update version number"
