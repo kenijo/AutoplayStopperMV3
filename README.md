@@ -16,7 +16,16 @@ It is inspired by the original [AutoplayStopper](https://chromewebstore.google.c
 
 Report issues at https://github.com/kenijo/AutoplayStopperMV3/issues
 
-Version 2025.09.22
+TODO
+
+- Improve website handling (such as tiktok, threads, youtube)
+
+Version 2025.09.25
+
+- Change the extension button behavior from turn the extension ON/OFF to showing up a popup menu that allows enabling/disabling the extension, adding the current site to the whitelist, and opening the options page.
+- The extension button icon matches the status of the extension (on, off, disabled)
+
+Version 2025.09.24
 
 - Add configuration export/import as JSON
 - Cleanup the options page UI
