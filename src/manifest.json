@@ -14,12 +14,12 @@
     },
     "content_scripts": [
         {
-            "matches": [
-                "http://*/*",
-                "https://*/*"
-            ],
+            "all_frames": true,
             "js": [
                 "content.js"
+            ],
+            "matches": [
+                "<all_urls>"
             ],
             "run_at": "document_start"
         }
@@ -35,8 +35,7 @@
     },
     "description": "Blocks video and audio autoplay on all websites, with a toggle button.",
     "host_permissions": [
-        "http://*/*",
-        "https://*/*"
+        "<all_urls>"
     ],
     "icons": {
         "16": "icons/icon16_disabled.png",

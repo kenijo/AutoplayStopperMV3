@@ -20,6 +20,11 @@ TODO
 
 - Improve website handling (such as tiktok, threads, youtube)
 
+Version 2025.09.26
+
+- Sync the global status button color with the extension status
+- Restore previous core blocking code that was mistakenly released and would not work on many websites anymore
+
 Version 2025.09.25
 
 - Change the extension button behavior from turn the extension ON/OFF to showing up a popup menu that allows enabling/disabling the extension, adding the current site to the whitelist, and opening the options page.
