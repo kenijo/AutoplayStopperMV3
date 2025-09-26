@@ -1,28 +1,29 @@
 ﻿{
     "action": {
         "default_icon": {
-            "16": "icons/icon16_enabled.png",
-            "24": "icons/icon24_enabled.png",
-            "32": "icons/icon32_enabled.png",
-            "48": "icons/icon48_enabled.png",
-            "64": "icons/icon64_enabled.png",
-            "128": "icons/icon128_enabled.png",
-            "256": "icons/icon256_enabled.png",
-            "512": "icons/icon512_enabled.png"
+            "16": "icons/icon16_disabled.png",
+            "24": "icons/icon24_disabled.png",
+            "32": "icons/icon32_disabled.png",
+            "48": "icons/icon48_disabled.png",
+            "64": "icons/icon64_disabled.png",
+            "128": "icons/icon128_disabled.png",
+            "256": "icons/icon256_disabled.png",
+            "512": "icons/icon512_disabled.png"
         },
-        "default_title": "Toggle AutoplayStopper"
+        "default_popup": "popup/popup.html",
+        "default_title": "AutoplayStopper"
     },
     "background": {
         "service_worker": "background.js"
     },
     "content_scripts": [
         {
-            "all_frames": true,
+            "matches": [
+                "http://*/*",
+                "https://*/*"
+            ],
             "js": [
                 "content.js"
-            ],
-            "matches": [
-                "<all_urls>"
             ],
             "run_at": "document_start"
         }
@@ -38,17 +39,18 @@
     },
     "description": "Blocks video and audio autoplay on all websites, with a toggle button.",
     "host_permissions": [
-        "<all_urls>"
+        "http://*/*",
+        "https://*/*"
     ],
     "icons": {
-        "16": "icons/icon16_enabled.png",
-        "24": "icons/icon24_enabled.png",
-        "32": "icons/icon32_enabled.png",
-        "48": "icons/icon48_enabled.png",
-        "64": "icons/icon64_enabled.png",
-        "128": "icons/icon128_enabled.png",
-        "256": "icons/icon256_enabled.png",
-        "512": "icons/icon512_enabled.png"
+        "16": "icons/icon16_disabled.png",
+        "24": "icons/icon24_disabled.png",
+        "32": "icons/icon32_disabled.png",
+        "48": "icons/icon48_disabled.png",
+        "64": "icons/icon64_disabled.png",
+        "128": "icons/icon128_disabled.png",
+        "256": "icons/icon256_disabled.png",
+        "512": "icons/icon512_disabled.png"
     },
     "manifest_version": 3,
     "name": "AutoplayStopper (MV3)",
