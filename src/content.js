@@ -2,219 +2,214 @@
 // Global AutoplayStopper with Shadow DOM support
 // -------------------------
 
-// Early return if whitelisted
-chrome.storage.local.get({ whitelist: [] }, ({ whitelist }) => {
+chrome.storage.local.get({ whitelist: [] }, (data) => {
     const hostname = location.hostname;
-    if (whitelist.some(domain => hostname.endsWith(domain))) {
-        console.debug("[AutoplayStopper] Disabled on whitelisted site:", hostname);
-        return;
+    const isWhitelisted = data.whitelist.some(domain => hostname.endsWith(domain));
+
+    if (isWhitelisted) {
+        if (DEBUG) console.log("[AutoplayStopper] Disabled on whitelisted site:", hostname);
+        return; // stop here, do not run AutoplayStopper
     }
 
-    // Constants and state
-    const DEBUG = false;
-    const AUTOPLAY_ATTRS = [
-        "autoplay",
-		"auto_play",
-		"autoPlay",
-		"autostart",
-		"autoStart",
-        "autostarts",
-		"autoStarts",
-		"autostartup",
-		"autoStartup",
-        "play",
-		"playing",
-		"playnext",
-		"playNext",
-		"playsinline",
-		"playsInline"
-    ];
-    const IFRAME_PARAMS = [
-        "autoplay",
-		"auto_play",
-		"autostart",
-		"autoStart",
-		"muted",
-        "playsinline"
-    ];
+    const DEBUG = true; // set false to silence logs
 
     let userInteracted = false;
     let blockingEnabled = true;
 
-    // --- State Management ---
-    const initState = () => {
-        chrome.storage.local.get("AutoplayStopperEnabled", ({ AutoplayStopperEnabled }) => {
-            if (typeof AutoplayStopperEnabled === "boolean") {
-                blockingEnabled = AutoplayStopperEnabled;
+    // --- Load initial toggle state ---
+    if (chrome?.storage?.local) {
+        chrome.storage.local.get("AutoplayStopperEnabled", (data) => {
+            if (typeof data.AutoplayStopperEnabled === "boolean") {
+                blockingEnabled = data.AutoplayStopperEnabled;
             }
-            DEBUG && console.log("[AutoplayStopper] Initial state:", blockingEnabled ? "ENABLED" : "DISABLED");
+            if (DEBUG) console.log("[AutoplayStopper] Initial state:", blockingEnabled ? "ENABLED" : "DISABLED");
         });
-    };
+    }
 
-    const setupMessageListener = () => {
-        chrome.runtime.onMessage?.addListener((msg) => {
-            if (msg?.AutoplayStopperEnabled === true || msg?.AutoplayStopperEnabled === false) {
+    // --- Listen for toggle updates ---
+    if (chrome?.runtime?.onMessage) {
+        chrome.runtime.onMessage.addListener((msg) => {
+            if (msg && typeof msg.AutoplayStopperEnabled === "boolean") {
                 blockingEnabled = msg.AutoplayStopperEnabled;
-                DEBUG && console.log("[AutoplayStopper] Toggled:", blockingEnabled ? "ENABLED" : "DISABLED");
+                if (DEBUG) console.log("[AutoplayStopper] Toggled:", blockingEnabled ? "ENABLED" : "DISABLED");
             }
         });
+    }
+
+    // --- Detect first user interaction ---
+    const markInteracted = () => {
+        userInteracted = true;
+        if (DEBUG) console.log("[AutoplayStopper] User interaction → media allowed");
     };
+    ["pointerdown", "mousedown", "touchstart", "keydown", "click"].forEach(evt => {
+        window.addEventListener(evt, markInteracted, { capture: true, once: true, passive: true });
+    });
 
-    // --- User Interaction ---
-    const setupInteractionListeners = () => {
-        const markInteracted = () => {
-            userInteracted = true;
-            DEBUG && console.log("[AutoplayStopper] User interaction → media allowed");
-        };
+    // -------------------------
+    // Core Media Scrubbing
+    // -------------------------
 
-        ["pointerdown", "mousedown", "touchstart", "keydown", "click"]
-            .forEach(evt => window.addEventListener(evt, markInteracted, {
-                capture: true,
-                once: true,
-                passive: true
-            }));
-    };
-
-    // --- Media Scrubbing ---
-    const scrubMediaElement = (el) => {
-        if (!(el instanceof HTMLMediaElement) || !blockingEnabled) return;
-
-        // Remove all autoplay-related attributes
-        AUTOPLAY_ATTRS.forEach(attr => el.removeAttribute(attr));
-
-        // Reset properties
-        el.autoplay = false;
-        el.muted = false;
-
-        if (!el.paused && !userInteracted) {
-            try {
-                el.pause();
-                DEBUG && console.log("[AutoplayStopper] Paused media:", el);
-            } catch (e) {
-                DEBUG && console.warn("[AutoplayStopper] Pause failed:", e);
-            }
-        }
-    };
-
-    const scrubIframe = (el) => {
-        if (!(el instanceof HTMLIFrameElement) || !blockingEnabled) return;
-
-        try {
-            const url = new URL(el.src, location.href);
-            let modified = false;
-
-            IFRAME_PARAMS.forEach(param => {
-                if (url.searchParams.has(param)) {
-                    url.searchParams.delete(param);
-                    modified = true;
-                }
-            });
-
-            if (modified) {
-                el.src = url.href;
-                DEBUG && console.log("[AutoplayStopper] Cleaned iframe src:", el);
-            }
-        } catch (e) {
-            DEBUG && console.warn("[AutoplayStopper] Iframe scrub failed:", e);
-        }
-    };
-
-    // --- DOM Traversal ---
-    const scrubTree = (root) => {
+    function scrubMedia(el) {
+        if (!(el instanceof HTMLMediaElement)) return;
         if (!blockingEnabled) return;
 
-        // Process media elements and iframes
+        el.auto_play = false;
+        el.autoplay = false;
+        el.autoPlay = false;
+        el.autostart = false;
+        el.autoStart = false;
+        el.autostarts = false;
+        el.autoStarts = false;
+        el.autostartup = false;
+        el.autoStartup = false;
+        el.play = false;
+        el.playing = false;
+        el.playnext = false;
+        el.playNext = false;
+        el.playsinline = false;
+        el.playsInline = false;
+
+        el.removeAttribute("auto_play");
+        el.removeAttribute("autoplay");
+        el.removeAttribute("autoPlay");
+        el.removeAttribute("autostart");
+        el.removeAttribute("autoStart");
+        el.removeAttribute("autostarts");
+        el.removeAttribute("autoStarts");
+        el.removeAttribute("autostartup");
+        el.removeAttribute("autoStartup");
+        el.removeAttribute("play");
+        el.removeAttribute("playing");
+        el.removeAttribute("playnext");
+        el.removeAttribute("playNext");
+        el.removeAttribute("playsinline");
+        el.removeAttribute("playsInline");
+
+        if (!el.paused && !userInteracted) {
+            try { el.pause(); } catch { }
+            if (DEBUG) console.log("[AutoplayStopper] Paused video/audio:", el);
+        }
+    }
+
+    function scrubIframe(el) {
+        if (!(el instanceof HTMLIFrameElement)) return;
+        if (!blockingEnabled) return;
+
+        const src = el.getAttribute("src");
+        if (!src) return;
+        try {
+            const u = new URL(src, location.href);
+            ["autoplay", "auto_play", "autostart", "autoStart", "playsinline"].forEach(p => {
+                if (u.searchParams.has(p)) u.searchParams.delete(p);
+            });
+            if (src !== u.href) {
+                el.setAttribute("src", u.href);
+                if (DEBUG) console.log("[AutoplayStopper] Cleaned iframe src:", src, "→", u.href);
+            }
+        } catch { }
+    }
+
+    // -------------------------
+    // Shadow DOM Traversal
+    // -------------------------
+
+    function scrubTree(root) {
         root.querySelectorAll("video, audio, iframe").forEach(el => {
-            el instanceof HTMLIFrameElement ? scrubIframe(el) : scrubMediaElement(el);
+            if (el instanceof HTMLIFrameElement) scrubIframe(el);
+            else scrubMedia(el);
         });
 
-        // Recurse into shadow DOM
+        // Recurse into open shadow roots
         root.querySelectorAll("*").forEach(el => {
-            if (el.shadowRoot) scrubTree(el.shadowRoot);
+            if (el.shadowRoot) {
+                scrubTree(el.shadowRoot);
+            }
         });
-    };
+    }
 
-    // --- Event Hooks ---
-    const setupEventHooks = () => {
-        // Media event listeners
-        ["canplay", "loadeddata"].forEach(evt => {
-            document.addEventListener(evt, (e) => {
-                if (!blockingEnabled || userInteracted) return;
-                const el = e.target;
-                if (el instanceof HTMLMediaElement && !el.paused) {
-                    try { el.pause(); } catch { }
-                    DEBUG && console.log(`[AutoplayStopper] Blocked on ${evt}:`, el);
-                }
-            }, true);
-        });
+    // Initial sweep
+    function initialSweep() {
+        if (!blockingEnabled) return;
+        scrubTree(document);
+        if (DEBUG) console.log("[AutoplayStopper] Initial sweep complete (with shadow DOM)");
+    }
+    initialSweep();
 
-        // Play event interception
-        document.addEventListener("play", (e) => {
+    // -------------------------
+    // Mutation Observer
+    // -------------------------
+
+    const mo = new MutationObserver((muts) => {
+        for (const m of muts) {
+            for (const node of m.addedNodes) {
+                if (!(node instanceof Element)) continue;
+
+                if (node instanceof HTMLMediaElement) scrubMedia(node);
+                else if (node instanceof HTMLIFrameElement) scrubIframe(node);
+
+                // Also scan this subtree
+                scrubTree(node);
+            }
+        }
+    });
+    mo.observe(document.documentElement || document, { childList: true, subtree: true });
+
+    // -------------------------
+    // Extra Event Hooks
+    // -------------------------
+
+    ["canplay", "loadeddata"].forEach(evt => {
+        document.addEventListener(evt, (e) => {
             if (!blockingEnabled || userInteracted) return;
             const el = e.target;
-            if (el instanceof HTMLMediaElement) {
+            if (el instanceof HTMLMediaElement && !el.paused) {
                 try { el.pause(); } catch { }
-                DEBUG && console.log("[AutoplayStopper] Intercepted play event:", el);
+                if (DEBUG) console.log(`[AutoplayStopper] Blocked on ${evt}:`, el);
             }
         }, true);
-    };
+    });
 
-    // --- Play Method Patching ---
-    const patchPlayMethod = () => {
-        const originalPlay = HTMLMediaElement.prototype.play;
-        if (!originalPlay || originalPlay.__autoplayPatched) return;
+    // -------------------------
+    // Aggressive watchdog loop
+    // -------------------------
 
-        const wrappedPlay = function (...args) {
-            if (!blockingEnabled) return originalPlay.apply(this, args);
+    const pauseLoop = setInterval(() => {
+        if (!blockingEnabled || userInteracted) {
+            clearInterval(pauseLoop);
+            return;
+        }
+        scrubTree(document);
+    }, 500);
+
+    // -------------------------
+    // Intercept play() calls
+    // -------------------------
+
+    document.addEventListener("play", (e) => {
+        if (!blockingEnabled) return;
+        const el = e.target;
+        if (el instanceof HTMLMediaElement && !userInteracted) {
+            try { el.pause(); } catch { }
+            if (DEBUG) console.log("[AutoplayStopper] Intercepted play event:", el);
+        }
+    }, true);
+
+    (function patchPlay() {
+        const realPlay = HTMLMediaElement.prototype.play;
+        if (!realPlay || realPlay.__autoplayPatched) return;
+
+        function wrappedPlay(...args) {
+            if (!blockingEnabled) return realPlay.apply(this, args);
             if (!userInteracted) {
                 try { this.pause(); } catch { }
-                DEBUG && console.log("[AutoplayStopper] play() call blocked", this);
+                if (DEBUG) console.log("[AutoplayStopper] play() call blocked", this);
                 return Promise.reject(new DOMException("Autoplay blocked by extension", "NotAllowedError"));
             }
-            return originalPlay.apply(this, args);
-        };
-
+            return realPlay.apply(this, args);
+        }
         wrappedPlay.__autoplayPatched = true;
         HTMLMediaElement.prototype.play = wrappedPlay;
-        DEBUG && console.log("[AutoplayStopper] Patched HTMLMediaElement.play()");
-    };
+        if (DEBUG) console.log("[AutoplayStopper] Patched HTMLMediaElement.play()");
+    })();
 
-    // --- Initialization ---
-    const init = () => {
-        initState();
-        setupMessageListener();
-        setupInteractionListeners();
-        setupEventHooks();
-        patchPlayMethod();
-
-        // Initial sweep
-        scrubTree(document);
-        DEBUG && console.log("[AutoplayStopper] Initial sweep complete");
-
-        // Mutation Observer
-        const observer = new MutationObserver((mutations) => {
-            for (const { addedNodes } of mutations) {
-                for (const node of addedNodes) {
-                    if (!(node instanceof Element)) continue;
-                    if (node instanceof HTMLMediaElement) scrubMediaElement(node);
-                    else if (node instanceof HTMLIFrameElement) scrubIframe(node);
-                    scrubTree(node);
-                }
-            }
-        });
-
-        observer.observe(document, { childList: true, subtree: true });
-
-        // Watchdog loop
-        const watchdog = setInterval(() => {
-            if (!blockingEnabled || userInteracted) {
-                clearInterval(watchdog);
-                return;
-            }
-            scrubTree(document);
-        }, 1000);
-    };
-
-    // Start the extension
-    init();
 });
