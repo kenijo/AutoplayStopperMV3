@@ -71,13 +71,14 @@ function isValidDomain(domain) {
  * @param {boolean} [isError=true] - Whether message is error
  */
 function showMessage(text, isError = true) {
-    elements.message.style.color = isError ? "var(--color-danger)" : "green";
-    elements.message.textContent = text;
+    const toast = document.getElementById("toast");
+    toast.textContent = text;
+    toast.style.backgroundColor = isError ? "rgba(var(--color-danger), 1)" : "rgba(var(--color-primary), 1)";
 
-    clearTimeout(elements.message.timer);
-    elements.message.timer = setTimeout(() => {
-        elements.message.textContent = "";
-    }, 2500);
+    toast.classList.add("show");
+    setTimeout(() => {
+        toast.classList.remove("show");
+    }, 3000);
 }
 
 // -------------------------
