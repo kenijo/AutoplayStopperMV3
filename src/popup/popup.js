@@ -1,14 +1,13 @@
 // Initialize buttons
+const bodyStyle = window.getComputedStyle(document.body);
+const openOptionsBtn = document.getElementById("openOptions");
 const toggleGlobalBtn = document.getElementById("toggleGlobal");
 const toggleSiteBtn = document.getElementById("toggleSite");
-const openOptionsBtn = document.getElementById("openOptions");
-
 
 // Load state
 chrome.storage.local.get({ autoplayStopperEnabled: true, whitelist: [] }, (data) => {
-    toggleGlobalBtn.textContent = data.autoplayStopperEnabled
-        ? "Disable Globaly"
-        : "Enable Globaly";
+    toggleGlobalBtn.textContent = data.autoplayStopperEnabled ? "Disable Globally" : "Enable Globally";
+    toggleGlobalBtn.style.backgroundColor = data.autoplayStopperEnabled ? bodyStyle.getPropertyValue('--color_primary') : bodyStyle.getPropertyValue('--color_dark');
 
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
         if (!tabs[0] || !tabs[0].url) return;
@@ -17,9 +16,7 @@ chrome.storage.local.get({ autoplayStopperEnabled: true, whitelist: [] }, (data)
 
         const hostname = new URL(tabs[0].url).hostname;
         const isWhitelisted = data.whitelist.some((d) => hostname.endsWith(d));
-        toggleSiteBtn.textContent = isWhitelisted
-            ? "Remove from Whitelist"
-            : "Add to Whitelist";
+        toggleSiteBtn.textContent = isWhitelisted ? "Remove from Whitelist" : "Add to Whitelist";
     });
 });
 
@@ -28,7 +25,8 @@ toggleGlobalBtn.addEventListener("click", () => {
     chrome.storage.local.get({ autoplayStopperEnabled: true }, (data) => {
         const newState = !data.autoplayStopperEnabled;
         chrome.storage.local.set({ autoplayStopperEnabled: newState }, () => {
-            toggleGlobalBtn.textContent = newState ? "Disable Globaly" : "Enable Globaly";
+            toggleGlobalBtn.textContent = newState ? "Disable Globally" : "Enable Globally";
+            toggleGlobalBtn.style.backgroundColor = newState ? bodyStyle.getPropertyValue('--color_primary') : bodyStyle.getPropertyValue('--color_dark');
         });
     });
 });

@@ -42,7 +42,7 @@ function setupRipple(button) {
             top: `${e.clientY - button.offsetTop - radius}px`,
             position: "absolute",
             borderRadius: "50%",
-            backgroundColor: "rgba(255, 255, 255, 0.6)",
+            backgroundColor: "var(--color_light)",
             transform: "scale(0)",
             animation: "ripple 600ms linear",
             pointerEvents: "none"
@@ -72,8 +72,10 @@ function isValidDomain(domain) {
  */
 function showMessage(text, isError = true) {
     const toast = document.getElementById("toast");
+    const bodyStyle = window.getComputedStyle(document.body)
+
     toast.textContent = text;
-    toast.style.backgroundColor = isError ? "rgba(var(--color-danger), 1)" : "rgba(var(--color-primary), 1)";
+    toast.style.backgroundColor = isError ? bodyStyle.getPropertyValue('--color_danger') : bodyStyle.getPropertyValue('--color_primary');
 
     toast.classList.add("show");
     setTimeout(() => {
