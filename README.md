@@ -1,6 +1,4 @@
-# AutoplayStopper (MV3)
-
-[![Chrome](assets/chrome.png "Chrome")](https://chromewebstore.google.com/detail/autoplaystopper-mv3/gcendpekmacfohmhhkbhejjfbepkkkib)
+# [AutoplayStopper (MV3)](https://chromewebstore.google.com/detail/autoplaystopper-mv3/gcendpekmacfohmhhkbhejjfbepkkkib)
 
 This extension is compatible with all Chromium based browsers such as: Brave, Chrome, Edge, Opera, Vivaldi, etc.
 
@@ -18,6 +16,7 @@ Report issues at https://github.com/kenijo/AutoplayStopperMV3/issues
 
 TODO
 
+- Improve support for exception list (allow autoplay ON or OFF)
 - Improve website handling (such as tiktok, threads, youtube)
 
 Version 2025.09.26
