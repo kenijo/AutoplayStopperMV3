@@ -5,33 +5,21 @@
 const ICON_PATHS = {
     on: {
         "16": "icons/icon16_on.png",
-        "24": "icons/icon24_on.png",
         "32": "icons/icon32_on.png",
         "48": "icons/icon48_on.png",
-        "64": "icons/icon64_on.png",
         "128": "icons/icon128_on.png",
-        "256": "icons/icon256_on.png",
-        "512": "icons/icon512_on.png"
     },
     off: {
         "16": "icons/icon16_off.png",
-        "24": "icons/icon24_off.png",
         "32": "icons/icon32_off.png",
         "48": "icons/icon48_off.png",
-        "64": "icons/icon64_off.png",
         "128": "icons/icon128_off.png",
-        "256": "icons/icon256_off.png",
-        "512": "icons/icon512_off.png"
     },
     disabled: {
         "16": "icons/icon16_disabled.png",
-        "24": "icons/icon24_disabled.png",
         "32": "icons/icon32_disabled.png",
         "48": "icons/icon48_disabled.png",
-        "64": "icons/icon64_disabled.png",
         "128": "icons/icon128_disabled.png",
-        "256": "icons/icon256_disabled.png",
-        "512": "icons/icon512_disabled.png"
     }
 };
 
@@ -78,7 +66,7 @@ function updateIcon(tabId, url) {
 
         if (!isEnabled) {
             chrome.action.setIcon({ tabId, path: ICON_PATHS["disabled"] });
-            chrome.action.setTitle({ tabId, title: "Autoplay Stopper: Disabled Globally" });
+            chrome.action.setTitle({ tabId, title: "AutoplayStopper: Disabled" });
             return;
         }
 
@@ -88,15 +76,15 @@ function updateIcon(tabId, url) {
 
             if (isWhitelisted) {
                 chrome.action.setIcon({ tabId, path: ICON_PATHS["off"] });
-                chrome.action.setTitle({ tabId, title: "Autoplay Stopper: Whitelisted Site" });
+                chrome.action.setTitle({ tabId, title: "AutoplayStopper: OFF" });
             } else {
                 chrome.action.setIcon({ tabId, path: ICON_PATHS["on"] });
-                chrome.action.setTitle({ tabId, title: "Autoplay Stopper: Active" });
+                chrome.action.setTitle({ tabId, title: "AutoplayStopper: ON" });
             }
         } catch (err) {
             // fallback if URL parsing fails
             chrome.action.setIcon({ tabId, path: ICON_PATHS["on"] });
-            chrome.action.setTitle({ tabId, title: "Autoplay Stopper" });
+            chrome.action.setTitle({ tabId, title: "AutoplayStopper" });
         }
     });
 }

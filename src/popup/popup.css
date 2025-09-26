@@ -39,13 +39,13 @@ h1 {
     color: var(--color_light);
 }
 
-#toggleSite {
-    background: var(--color_secondary);
-    color: var(--color_light);
-    display: none;
-}
-
 #openOptions {
     background: var(--color_dark);
     color: var(--color_light);
+}
+
+#toggleSite {
+    background: var(--color_primary);
+    color: var(--color_light);
+    display: none;
 }

@@ -7,8 +7,8 @@ const openOptionsBtn = document.getElementById("openOptions");
 // Load state
 chrome.storage.local.get({ autoplayStopperEnabled: true, whitelist: [] }, (data) => {
     toggleGlobalBtn.textContent = data.autoplayStopperEnabled
-        ? "Disable Globally"
-        : "Enable Globally";
+        ? "Disable Globaly"
+        : "Enable Globaly";
 
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
         if (!tabs[0] || !tabs[0].url) return;
@@ -28,7 +28,7 @@ toggleGlobalBtn.addEventListener("click", () => {
     chrome.storage.local.get({ autoplayStopperEnabled: true }, (data) => {
         const newState = !data.autoplayStopperEnabled;
         chrome.storage.local.set({ autoplayStopperEnabled: newState }, () => {
-            toggleGlobalBtn.textContent = newState ? "Disable Globally" : "Enable Globally";
+            toggleGlobalBtn.textContent = newState ? "Disable Globaly" : "Enable Globaly";
         });
     });
 });

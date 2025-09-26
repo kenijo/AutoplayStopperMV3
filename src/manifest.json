@@ -2,13 +2,9 @@
     "action": {
         "default_icon": {
             "16": "icons/icon16_disabled.png",
-            "24": "icons/icon24_disabled.png",
             "32": "icons/icon32_disabled.png",
             "48": "icons/icon48_disabled.png",
-            "64": "icons/icon64_disabled.png",
             "128": "icons/icon128_disabled.png",
-            "256": "icons/icon256_disabled.png",
-            "512": "icons/icon512_disabled.png"
         },
         "default_popup": "popup/popup.html",
         "default_title": "AutoplayStopper"
@@ -44,13 +40,9 @@
     ],
     "icons": {
         "16": "icons/icon16_disabled.png",
-        "24": "icons/icon24_disabled.png",
         "32": "icons/icon32_disabled.png",
         "48": "icons/icon48_disabled.png",
-        "64": "icons/icon64_disabled.png",
         "128": "icons/icon128_disabled.png",
-        "256": "icons/icon256_disabled.png",
-        "512": "icons/icon512_disabled.png"
     },
     "manifest_version": 3,
     "name": "AutoplayStopper (MV3)",
