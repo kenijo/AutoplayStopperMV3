@@ -1,0 +1,51 @@
+:root {
+    --color_background: #FFFFFF;
+    --color_danger: #BF616A;
+    --color_dark: #403E41;
+    --color_light: #F7F7F7;
+    --color_primary: #81A1C1;
+    --color_secondary: #A3BE8C;
+    --font_family: 'Roboto', 'Arial', sans-serif;
+    --font_size: 12px;
+    --radius: 4px;
+    --shadow: 0 2px 6px color-mix(in srgb, var(--color_dark) 10%, transparent);
+}
+
+body {
+    background: var(--color_light);
+    color: var(--color_dark);
+    font-family: var(--font_family);
+    margin: 10px;
+    min-width: 200px;
+}
+
+button {
+    border-radius: var(--radius);
+    border: none;
+    cursor: pointer;
+    font-size: var(--font_size);
+    margin: 4px 0;
+    padding: 6px;
+    width: 100%;
+}
+
+h1 {
+    margin: 0 0 10px;
+    text-align: center;
+}
+
+#toggleGlobal {
+    background: var(--color_primary);
+    color: var(--color_light);
+}
+
+#toggleSite {
+    background: var(--color_secondary);
+    color: var(--color_light);
+    display: none;
+}
+
+#openOptions {
+    background: var(--color_dark);
+    color: var(--color_light);
+}
