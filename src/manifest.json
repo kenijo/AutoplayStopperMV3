@@ -4,7 +4,7 @@
             "16": "icons/icon16_disabled.png",
             "32": "icons/icon32_disabled.png",
             "48": "icons/icon48_disabled.png",
-            "128": "icons/icon128_disabled.png",
+            "128": "icons/icon128_disabled.png"
         },
         "default_popup": "popup/popup.html",
         "default_title": "AutoplayStopper"
@@ -42,7 +42,7 @@
         "16": "icons/icon16_disabled.png",
         "32": "icons/icon32_disabled.png",
         "48": "icons/icon48_disabled.png",
-        "128": "icons/icon128_disabled.png",
+        "128": "icons/icon128_disabled.png"
     },
     "manifest_version": 3,
     "name": "AutoplayStopper (MV3)",
