@@ -6,7 +6,7 @@ const toggleSiteBtn = document.getElementById("toggleSite");
 
 // Load state
 chrome.storage.local.get({ autoplayStopperEnabled: true, whitelist: [] }, (data) => {
-    toggleGlobalBtn.textContent = data.autoplayStopperEnabled ? "Disable Globally" : "Enable Globally";
+    toggleGlobalBtn.textContent = data.autoplayStopperEnabled ? "Globally Enabled" : "Globally Disabled";
     toggleGlobalBtn.style.backgroundColor = data.autoplayStopperEnabled ? bodyStyle.getPropertyValue('--color_primary') : bodyStyle.getPropertyValue('--color_dark');
 
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
@@ -25,7 +25,7 @@ toggleGlobalBtn.addEventListener("click", () => {
     chrome.storage.local.get({ autoplayStopperEnabled: true }, (data) => {
         const newState = !data.autoplayStopperEnabled;
         chrome.storage.local.set({ autoplayStopperEnabled: newState }, () => {
-            toggleGlobalBtn.textContent = newState ? "Disable Globally" : "Enable Globally";
+            toggleGlobalBtn.textContent = newState ? "Globally Enabled" : "Globally Disabled";
             toggleGlobalBtn.style.backgroundColor = newState ? bodyStyle.getPropertyValue('--color_primary') : bodyStyle.getPropertyValue('--color_dark');
         });
     });
