@@ -1,10 +1,10 @@
 #!/bin/sh
 
 # Update version in manifest.json before pushing
-node .tasks/updateVersion.js
+node "updateVersion.js"
 
 # Add manifest.jon to staging
-git add manifest.json
+git add "src/manifest.json"
 
 # Commit the changes
 git commit -m "Update Version Number"
@@ -13,8 +13,4 @@ git commit -m "Update Version Number"
 git rm "AutoplayStopper(MV3).zip"
 
 # Create zip
-git archive -o "AutoplayStopper(MV3).zip" main
-
-# Remove unnecessary files from zip
-7za d "AutoplayStopper(MV3).zip" .*
-7za d "AutoplayStopper(MV3).zip" assets
+git archive -o "AutoplayStopper(MV3).zip" main:src --add-file=README.md

@@ -8,7 +8,7 @@ const day = String(today.getDate()).padStart(2, '0');
 const currentDate = `${year}.${month}.${day}`;
 
 // Get the file path from command-line arguments
-const filePath = 'manifest.json'; // The first argument after the script name
+const filePath = 'src/manifest.json'; // The first argument after the script name
 
 const searchStringPattern = /"version":\s*"\d{4}\.\d{2}\.\d{2}"/; // Regex to match any date in "version": "YYYY.MM.DD" format
 const replaceString = `"version": "${currentDate}"`; // Use today's date
