@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Update version in manifest.json before pushing
-node "updateVersion.js"
+node ".githooks/updateVersion.js"
 
 # Add manifest.jon to staging
 git add "src/manifest.json"
