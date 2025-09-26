@@ -1,7 +1,7 @@
 # ============================================================
 # Project Files to ignore
 # ============================================================
-_metadata/*
+src/_metadata/*
 .vscode
 *.code-workspace
 AutoplayStopper(MV3).zip
