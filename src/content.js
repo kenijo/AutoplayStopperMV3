@@ -18,9 +18,9 @@ chrome.storage.local.get({ whitelist: [] }, (data) => {
 
     // --- Load initial toggle state ---
     if (chrome?.storage?.local) {
-        chrome.storage.local.get("AutoplayStopperEnabled", (data) => {
-            if (typeof data.AutoplayStopperEnabled === "boolean") {
-                blockingEnabled = data.AutoplayStopperEnabled;
+        chrome.storage.local.get("autoplayStopperEnabled", (data) => {
+            if (typeof data.autoplayStopperEnabled === "boolean") {
+                blockingEnabled = data.autoplayStopperEnabled;
             }
             if (DEBUG) console.log("[AutoplayStopper] Initial state:", blockingEnabled ? "ENABLED" : "DISABLED");
         });
@@ -29,8 +29,8 @@ chrome.storage.local.get({ whitelist: [] }, (data) => {
     // --- Listen for toggle updates ---
     if (chrome?.runtime?.onMessage) {
         chrome.runtime.onMessage.addListener((msg) => {
-            if (msg && typeof msg.AutoplayStopperEnabled === "boolean") {
-                blockingEnabled = msg.AutoplayStopperEnabled;
+            if (msg && typeof msg.autoplayStopperEnabled === "boolean") {
+                blockingEnabled = msg.autoplayStopperEnabled;
                 if (DEBUG) console.log("[AutoplayStopper] Toggled:", blockingEnabled ? "ENABLED" : "DISABLED");
             }
         });
