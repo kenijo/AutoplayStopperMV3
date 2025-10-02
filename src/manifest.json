@@ -19,7 +19,8 @@
                 "content.js"
             ],
             "matches": [
-                "<all_urls>"
+                "http://*/*",
+                "https://*/*"
             ],
             "run_at": "document_start"
         }
@@ -35,7 +36,8 @@
     },
     "description": "Blocks video and audio autoplay on all websites, with a toggle button.",
     "host_permissions": [
-        "<all_urls>"
+        "http://*/*",
+        "https://*/*"
     ],
     "icons": {
         "16": "icons/icon16_disabled.png",
