@@ -2,6 +2,8 @@
 // Global AutoplayStopper with Shadow DOM support
 // -------------------------
 
+const DEBUG = true; // set false to silence logs
+
 chrome.storage.local.get({ whitelist: [] }, (data) => {
     const hostname = location.hostname;
     const isWhitelisted = data.whitelist.some(domain => hostname.endsWith(domain));
@@ -10,8 +12,6 @@ chrome.storage.local.get({ whitelist: [] }, (data) => {
         if (DEBUG) console.log("[AutoplayStopper] Disabled on whitelisted site:", hostname);
         return; // stop here, do not run AutoplayStopper
     }
-
-    const DEBUG = true; // set false to silence logs
 
     let userInteracted = false;
     let blockingEnabled = true;
