@@ -16,7 +16,7 @@ chrome.storage.local.get({ whitelist: [] }, (data) => {
     let userInteracted = false;
     let blockingEnabled = true;
 
-    // --- Load initial toggle state ---
+    // Load initial toggle state
     if (chrome?.storage?.local) {
         chrome.storage.local.get("autoplayStopperEnabled", (data) => {
             if (typeof data.autoplayStopperEnabled === "boolean") {
@@ -26,7 +26,7 @@ chrome.storage.local.get({ whitelist: [] }, (data) => {
         });
     }
 
-    // --- Listen for toggle updates ---
+    // Listen for toggle updates
     if (chrome?.runtime?.onMessage) {
         chrome.runtime.onMessage.addListener((msg) => {
             if (msg && typeof msg.autoplayStopperEnabled === "boolean") {
@@ -36,7 +36,7 @@ chrome.storage.local.get({ whitelist: [] }, (data) => {
         });
     }
 
-    // --- Detect first user interaction ---
+    // Detect first user interaction
     const markInteracted = () => {
         userInteracted = true;
         if (DEBUG) console.log("[AutoplayStopper] User interaction → media allowed");
