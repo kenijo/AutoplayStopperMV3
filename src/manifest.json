@@ -19,7 +19,8 @@
                 "content.js"
             ],
             "matches": [
-                "<all_urls>"
+                "http://*/*",
+                "https://*/*"
             ],
             "run_at": "document_start"
         }
@@ -35,7 +36,8 @@
     },
     "description": "Blocks unwanted media autoplay on websites, with per-site whitelist control.",
     "host_permissions": [
-        "<all_urls>"
+        "http://*/*",
+        "https://*/*"
     ],
     "icons": {
         "16": "icons/icon16.png",
@@ -48,6 +50,7 @@
     "options_page": "options/options.html",
     "permissions": [
         "declarativeNetRequest",
+        "declarativeNetRequestWithHostAccess",
         "storage",
         "tabs"
     ],
