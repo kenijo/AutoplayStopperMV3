@@ -48,7 +48,7 @@ chrome.tabs.onActivated.addListener((activeInfo) => {
     });
 });
 
-// Update icon whenever storage changes (global toggle or whitelist)
+// Update icon when storage changes
 chrome.storage.onChanged.addListener((changes, area) => {
     if (area === "local" && (changes.autoplayStopperEnabled || changes.whitelist)) {
         chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
