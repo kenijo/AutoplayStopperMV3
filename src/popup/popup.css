@@ -6,7 +6,7 @@
     --color_primary: #81A1C1;
     --color_secondary: #A3BE8C;
     --font_family: 'Roboto', 'Arial', sans-serif;
-    --font_size: 12px;
+    --font_size: 1.2em;
     --radius: 4px;
     --shadow: 0 2px 6px color-mix(in srgb, var(--color_dark) 10%, transparent);
 }
@@ -29,9 +29,23 @@ button {
     width: 100%;
 }
 
+button:hover {
+    opacity: 0.9;
+}
+
+button:active {
+    transform: scale(0.98);
+}
+
 h1 {
     margin: 0 0 10px;
     text-align: center;
+}
+
+#currentDomain {
+    text-align: center;
+    font-size: var(--font_size);
+    color: var(--color_dark);
 }
 
 #toggleGlobal {
@@ -47,5 +61,4 @@ h1 {
 #toggleSite {
     background: var(--color_primary);
     color: var(--color_light);
-    display: none;
 }
