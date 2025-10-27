@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# Disable debug mode before pushing
+node ".githooks/disableDebugMode.js.js"
+
 # Update version in manifest.json before pushing
 node ".githooks/updateVersion.js"
 

@@ -6,6 +6,7 @@ const year = today.getFullYear();
 const month = String(today.getMonth() + 1).padStart(2, '0'); // Months are zero-based
 const day = String(today.getDate()).padStart(2, '0');
 const currentDate = `${year}.${month}.${day}`;
+const confirmation = "Version number set to " + currentDate;
 
 // Get the file path from command-line arguments
 const filePath = 'src/manifest.json'; // The first argument after the script name
@@ -23,7 +24,7 @@ fs.readFile(filePath, 'utf8', (err, data) => {
         if (err) {
             console.error('Error writing file:', err);
         } else {
-            console.log('String replaced successfully with date:', currentDate);
+            console.log(confirmation);
         }
     });
 });
