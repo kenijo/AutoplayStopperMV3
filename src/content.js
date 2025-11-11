@@ -37,7 +37,13 @@ chrome.storage.local.get({ whitelist: [] }, (data) => {
     }
 
     // Detect first user interaction
-    const markInteracted = () => {
+    const markInteracted = (event) => {
+        if (userInteracted) return;
+        if (event && event.isTrusted === false) {
+            if (DEBUG) console.log("[AutoplayStopper] Ignoring synthetic interaction:", event.type);
+            return;
+        }
+
         userInteracted = true;
         if (DEBUG) console.log("[AutoplayStopper] User interaction → media allowed");
     };
