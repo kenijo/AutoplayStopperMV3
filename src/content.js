@@ -26,6 +26,33 @@ chrome.storage.local.get({ whitelist: [] }, (data) => {
         });
     }
 
+    // Live storage sync for global toggle + whitelist
+    chrome.storage.onChanged.addListener((changes, area) => {
+        if (area !== "local") return;
+
+        if (changes.autoplayStopperEnabled) {
+            blockingEnabled = changes.autoplayStopperEnabled.newValue;
+            if (DEBUG) console.log("[AutoplayStopper] Storage toggle →", blockingEnabled ? "ENABLED" : "DISABLED");
+        }
+
+        if (changes.whitelist) {
+            const updatedWhitelist = changes.whitelist.newValue || [];
+            const nowWhitelisted = updatedWhitelist.some(d => hostname.endsWith(d));
+
+            if (nowWhitelisted) {
+                if (DEBUG) console.log("[AutoplayStopper] This site was JUST whitelisted → disabling blocking");
+                // Immediately stop blocking:
+                blockingEnabled = false;
+            } else {
+                // If removed from whitelist, re-enable based on global setting
+                chrome.storage.local.get("autoplayStopperEnabled", (data) => {
+                    blockingEnabled = !!data.autoplayStopperEnabled;
+                    if (DEBUG) console.log("[AutoplayStopper] Site removed from whitelist → blocking =", blockingEnabled);
+                });
+            }
+        }
+    });
+
     // Listen for toggle updates
     if (chrome?.runtime?.onMessage) {
         chrome.runtime.onMessage.addListener((msg) => {
