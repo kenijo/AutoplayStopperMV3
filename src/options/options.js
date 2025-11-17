@@ -60,8 +60,20 @@ function setupRipple(button) {
  * Validates domain format
  * @param {string} domain - Domain to validate
  * @returns {boolean} True if valid domain
+ * - Supports normal domains (example.com)
+ * - Supports localhost
+ * - Supports *.local internal domains (office.local)
  */
 function isValidDomain(domain) {
+    domain = domain.trim().toLowerCase();
+
+    // allow localhost
+    if (domain === "localhost") return true;
+
+    // allow *.local (dev.local, internal.local, etc)
+    if (domain.endsWith(".local")) return true;
+
+    // normal domain validation
     return /^(?!-)([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/.test(domain);
 }
 
@@ -141,7 +153,7 @@ function addDomain() {
         .replace(/\/.*$/, "");
 
     if (!isValidDomain(domain)) {
-        showMessage("Invalid domain format (e.g., example.com)");
+        showMessage("Invalid domain format (e.g., example.com, localhost, dev.local)");
         return;
     }
 
@@ -175,7 +187,7 @@ function updateWhitelist(domains) {
  */
 function exportWhitelist() {
     const validDomains = currentDomains
-        .map(d => typeof d === "string" ? d.trim() : "")
+        .map(d => (typeof d === "string" ? d.trim() : ""))
         .filter(isValidDomain);
 
     if (validDomains.length === 0) {
@@ -217,7 +229,7 @@ function handleImport(e) {
             }
 
             const validDomains = imported
-                .map(d => typeof d === "string" ? d.trim() : "")
+                .map(d => (typeof d === "string" ? d.trim() : ""))
                 .filter(isValidDomain);
 
             if (validDomains.length === 0) {
@@ -284,7 +296,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Search functionality
     elements.searchInput.addEventListener("input", () =>
-        renderDomainList(elements.searchInput.value));
+        renderDomainList(elements.searchInput.value)
+    );
 
     // Keyboard shortcuts
     elements.searchInput.addEventListener("keydown", (e) => {
