@@ -1,5 +1,7 @@
 # [AutoplayStopper (MV3)](https://chromewebstore.google.com/detail/autoplaystopper-mv3/gcendpekmacfohmhhkbhejjfbepkkkib)
 
+## Description
+
 Blocks unwanted media autoplay on websites, with per-site whitelist control.
 
 It is inspired by the original [AutoplayStopper](https://chromewebstore.google.com/detail/AutoplayStopper/ejddcgojdblidajhngkogefpkknnebdh) Chrome Extension. ([Repository of the original extension](https://github.com/kenijo/AutoplayStopperMV2))
@@ -8,11 +10,11 @@ It is inspired by the original [AutoplayStopper](https://chromewebstore.google.c
 
 This extension is compatible with all Chromium based browsers such as: Brave, Chrome, Edge, Opera, Vivaldi, etc.
 
-Some browsers such as such as [Brave](https://brave.com) or [Vivaldi](https://vivaldi.com), or even [Firefox](https://www.firefox.com) already have proper browser based autoplay blocking support. Just enable the browser's built-in autoplay blocking feature in the settings.
+Some browsers such as such as [Brave](https://brave.com), [Vivaldi](https://vivaldi.com), or [Firefox](https://www.firefox.com) already have proper browser based autoplay blocking support. Just enable the browser's built-in autoplay blocking feature in the settings.
 
 ## Release Notes
 
-Report issues at https://github.com/kenijo/AutoplayStopperMV3/issues
+Report issues at <https://github.com/kenijo/AutoplayStopperMV3/issues>
 
 TODO
 
