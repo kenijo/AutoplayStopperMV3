@@ -59,41 +59,30 @@ chrome.storage.local.get({ whitelist: [] }, (data) => {
         if (!(el instanceof HTMLMediaElement)) return;
         if (!blockingEnabled) return;
 
-        el.auto_play = false;
-        el.autoplay = false;
-        el.autoPlay = false;
-        el.autostart = false;
-        el.autoStart = false;
-        el.autostarts = false;
-        el.autoStarts = false;
-        el.autostartup = false;
-        el.autoStartup = false;
-        el.play = false;
-        el.playing = false;
-        el.playnext = false;
-        el.playNext = false;
-        el.playsinline = false;
-        el.playsInline = false;
-
-        el.removeAttribute("auto_play");
-        el.removeAttribute("autoplay");
-        el.removeAttribute("autoPlay");
-        el.removeAttribute("autostart");
-        el.removeAttribute("autoStart");
-        el.removeAttribute("autostarts");
-        el.removeAttribute("autoStarts");
-        el.removeAttribute("autostartup");
-        el.removeAttribute("autoStartup");
-        el.removeAttribute("play");
-        el.removeAttribute("playing");
-        el.removeAttribute("playnext");
-        el.removeAttribute("playNext");
-        el.removeAttribute("playsinline");
-        el.removeAttribute("playsInline");
+        // Remove attributes (do not overwrite DOM methods)
+        const attrs = [
+            "auto_play",
+            "autoplay",
+            "autoPlay",
+            "autostart",
+            "autoStart",
+            "autostarts",
+            "autoStarts",
+            "autostartup",
+            "autoStartup",
+            "playing",
+            "playnext",
+            "playNext",
+            "playsInline",
+            "playsinline"
+        ];
+        attrs.forEach(a => {
+            try { el.removeAttribute(a); } catch { }
+        });
 
         if (!el.paused && !userInteracted) {
             try { el.pause(); } catch { }
-            if (DEBUG) console.log("[AutoplayStopper] Paused video/audio:", el);
+            if (DEBUG) console.log("[AutoplayStopper] Paused media:", el);
         }
     }
 
@@ -105,9 +94,29 @@ chrome.storage.local.get({ whitelist: [] }, (data) => {
         if (!src) return;
         try {
             const u = new URL(src, location.href);
-            ["autoplay", "auto_play", "autostart", "autoStart", "playsinline"].forEach(p => {
-                if (u.searchParams.has(p)) u.searchParams.delete(p);
+
+            // Remove attributes (do not overwrite DOM methods)
+            const attrs = [
+                "auto_play",
+                "autoplay",
+                "autoPlay",
+                "autostart",
+                "autoStart",
+                "autostarts",
+                "autoStarts",
+                "autostartup",
+                "autoStartup",
+                "playing",
+                "playnext",
+                "playNext",
+                "playsInline",
+                "playsinline"
+            ];
+
+            attrs.forEach(a => {
+                if (u.searchParams.has(a)) u.searchParams.delete(a);
             });
+
             if (src !== u.href) {
                 el.setAttribute("src", u.href);
                 if (DEBUG) console.log("[AutoplayStopper] Cleaned iframe src:", src, "→", u.href);
