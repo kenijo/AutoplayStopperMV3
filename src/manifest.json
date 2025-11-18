@@ -51,6 +51,7 @@
     "permissions": [
         "declarativeNetRequest",
         "declarativeNetRequestWithHostAccess",
+        "sidePanel",
         "storage",
         "tabs"
     ],
