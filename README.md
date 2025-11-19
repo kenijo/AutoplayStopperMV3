@@ -10,7 +10,7 @@ It is inspired by the original [AutoplayStopper](https://chromewebstore.google.c
 
 This extension is compatible with all Chromium based browsers such as: Brave, Chrome, Edge, Opera, Vivaldi, etc.
 
-Some browsers such as such as [Brave](https://brave.com), [Vivaldi](https://vivaldi.com), or [Firefox](https://www.firefox.com) already have proper browser based autoplay blocking support. Just enable the browser's built-in autoplay blocking feature in the settings.
+Some browsers such as such as [Brave](https://brave.com), [Edge](https://www.microsoft.com/edge), [Vivaldi](https://vivaldi.com), or [Firefox](https://www.firefox.com) already have proper browser based autoplay blocking support. Just enable the browser's built-in autoplay blocking feature in the settings.
 
 ## Release Notes
 
