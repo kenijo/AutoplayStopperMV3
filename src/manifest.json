@@ -16,6 +16,7 @@
         {
             "all_frames": true,
             "js": [
+                "constants.js",
                 "content.js"
             ],
             "matches": [
@@ -51,7 +52,6 @@
     "permissions": [
         "declarativeNetRequest",
         "declarativeNetRequestWithHostAccess",
-        "sidePanel",
         "storage",
         "tabs"
     ],
