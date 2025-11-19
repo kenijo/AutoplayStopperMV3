@@ -24,12 +24,11 @@ const ICON_PATHS = {
 };
 
 // On install, ensure default state
-chrome.runtime.onInstalled.addListener(() => {
-    chrome.storage.local.get({ autoplayStopperEnabled: null }, (data) => {
-        if (data.autoplayStopperEnabled === null) {
-            chrome.storage.local.set({ autoplayStopperEnabled: true });
-        }
-    });
+chrome.runtime.onInstalled.addListener(async () => {
+    const data = await chrome.storage.local.get({ autoplayStopperEnabled: null });
+    if (data.autoplayStopperEnabled === null) {
+        await chrome.storage.local.set({ autoplayStopperEnabled: true });
+    }
 });
 
 // Update icon when a tab is updated
@@ -40,51 +39,58 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 });
 
 // Update icon when active tab changes
-chrome.tabs.onActivated.addListener((activeInfo) => {
-    chrome.tabs.get(activeInfo.tabId, (tab) => {
+chrome.tabs.onActivated.addListener(async (activeInfo) => {
+    try {
+        const tab = await chrome.tabs.get(activeInfo.tabId);
         if (tab && tab.url) {
             updateIcon(tab.id, tab.url);
         }
-    });
+    } catch (err) {
+        // Tab might be closed or inaccessible
+    }
 });
 
 // Update icon when storage changes
-chrome.storage.onChanged.addListener((changes, area) => {
+chrome.storage.onChanged.addListener(async (changes, area) => {
     if (area === "local" && (changes.autoplayStopperEnabled || changes.whitelist)) {
-        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-            if (tabs[0] && tabs[0].url) {
-                updateIcon(tabs[0].id, tabs[0].url);
-            }
-        });
+        const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+        if (tabs[0] && tabs[0].url) {
+            updateIcon(tabs[0].id, tabs[0].url);
+        }
     }
 });
 
 // Core logic: set icon & title
-function updateIcon(tabId, url) {
-    chrome.storage.local.get({ autoplayStopperEnabled: true, whitelist: [] }, (data) => {
+async function updateIcon(tabId, url) {
+    try {
+        const data = await chrome.storage.local.get({ autoplayStopperEnabled: true, whitelist: [] });
         const isEnabled = data.autoplayStopperEnabled;
 
         if (!isEnabled) {
-            chrome.action.setIcon({ tabId, path: ICON_PATHS["disabled"] });
-            chrome.action.setTitle({ tabId, title: "AutoplayStopper: Disabled" });
+            await chrome.action.setIcon({ tabId, path: ICON_PATHS["disabled"] });
+            await chrome.action.setTitle({ tabId, title: "AutoplayStopper: Disabled" });
             return;
         }
 
+        let isWhitelisted = false;
         try {
             const hostname = new URL(url).hostname;
-            const isWhitelisted = data.whitelist.some((d) => hostname.endsWith(d));
-
-            if (isWhitelisted) {
-                chrome.action.setIcon({ tabId, path: ICON_PATHS["off"] });
-                chrome.action.setTitle({ tabId, title: "AutoplayStopper: OFF" });
-            } else {
-                chrome.action.setIcon({ tabId, path: ICON_PATHS["on"] });
-                chrome.action.setTitle({ tabId, title: "AutoplayStopper: ON" });
-            }
-        } catch (err) {
-            // fallback if URL parsing fails
-            chrome.action.setIcon({ tabId, path: ICON_PATHS["on"] });
-            chrome.action.setTitle({ tabId, title: "AutoplayStopper" });
+            isWhitelisted = data.whitelist.some((d) => hostname.endsWith(d));
+        } catch (e) {
+            // Invalid URL, assume not whitelisted
         }
-    });
+
+        if (isWhitelisted) {
+            await chrome.action.setIcon({ tabId, path: ICON_PATHS["off"] });
+            await chrome.action.setTitle({ tabId, title: "AutoplayStopper: OFF" });
+        } else {
+            await chrome.action.setIcon({ tabId, path: ICON_PATHS["on"] });
+            await chrome.action.setTitle({ tabId, title: "AutoplayStopper: ON" });
+        }
+    } catch (err) {
+        console.error("Error updating icon:", err);
+        // Fallback
+        chrome.action.setIcon({ tabId, path: ICON_PATHS["on"] });
+        chrome.action.setTitle({ tabId, title: "AutoplayStopper" });
+    }
 }
