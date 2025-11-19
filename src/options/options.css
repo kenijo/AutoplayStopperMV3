@@ -219,3 +219,39 @@ input[type="search"]:focus {
     opacity: 1;
     visibility: visible;
 }
+
+/* ============================
+   Debug Toggle Section Styling
+   ============================ */
+
+.debug-section {
+    float: right;
+    width: 40%;
+}
+
+.debug-label {
+    float: right;
+}
+
+/* Flex container for the toggle */
+.debug-toggle {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    cursor: pointer;
+    user-select: none;
+}
+
+/* Hide the actual checkbox */
+.debug-toggle input[type="checkbox"] {
+    display: none;
+}
+
+/* When checkbox is checked */
+.debug-toggle input[type="checkbox"]:checked+.toggle-switch {
+    background: var(--color_primary);
+}
+
+.debug-toggle input[type="checkbox"]:checked+.toggle-switch::after {
+    transform: translateX(20px);
+}

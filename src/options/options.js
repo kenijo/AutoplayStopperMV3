@@ -262,6 +262,16 @@ function handleImport(e) {
 
 // Initialize
 document.addEventListener("DOMContentLoaded", () => {
+    // Load existing debug flag
+    chrome.storage.local.get({ debugEnabled: false }, ({ debugEnabled }) => {
+        document.getElementById("debugToggle").checked = debugEnabled;
+    });
+
+    // Listen for changes to debug flag
+    document.getElementById("debugToggle").addEventListener("change", (e) => {
+        chrome.storage.local.set({ debugEnabled: e.target.checked });
+    });
+
     // Load saved whitelist
     chrome.storage.local.get({ whitelist: [] }, ({ whitelist }) => {
         currentDomains = whitelist;
