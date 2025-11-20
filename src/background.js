@@ -23,11 +23,27 @@ const ICON_PATHS = {
     }
 };
 
-// On install, ensure default state
+// On install, ensure default state and migrate from local to sync
 chrome.runtime.onInstalled.addListener(async () => {
-    const data = await chrome.storage.local.get({ autoplayStopperEnabled: null });
-    if (data.autoplayStopperEnabled === null) {
-        await chrome.storage.local.set({ autoplayStopperEnabled: true });
+    // 1. Check if we have sync data
+    const syncData = await chrome.storage.sync.get(["autoplayStopperEnabled", "whitelist"]);
+
+    // 2. If sync is empty (new install or first run after update), check local
+    if (syncData.autoplayStopperEnabled === undefined) {
+        const localData = await chrome.storage.local.get(["autoplayStopperEnabled", "whitelist"]);
+
+        if (localData.autoplayStopperEnabled !== undefined) {
+            // Migrate local -> sync
+            await chrome.storage.sync.set({
+                autoplayStopperEnabled: localData.autoplayStopperEnabled,
+                whitelist: localData.whitelist || []
+            });
+            // Optional: Clear local to avoid confusion, or keep as backup. 
+            // For now, we'll leave it but future reads will use sync.
+        } else {
+            // New install, set defaults
+            await chrome.storage.sync.set({ autoplayStopperEnabled: true, whitelist: [] });
+        }
     }
 });
 
@@ -52,7 +68,8 @@ chrome.tabs.onActivated.addListener(async (activeInfo) => {
 
 // Update icon when storage changes
 chrome.storage.onChanged.addListener(async (changes, area) => {
-    if (area === "local" && (changes.autoplayStopperEnabled || changes.whitelist)) {
+    // Listen to 'sync' instead of 'local'
+    if (area === "sync" && (changes.autoplayStopperEnabled || changes.whitelist)) {
         const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
         if (tabs[0] && tabs[0].url) {
             updateIcon(tabs[0].id, tabs[0].url);
@@ -63,7 +80,8 @@ chrome.storage.onChanged.addListener(async (changes, area) => {
 // Core logic: set icon & title
 async function updateIcon(tabId, url) {
     try {
-        const data = await chrome.storage.local.get({ autoplayStopperEnabled: true, whitelist: [] });
+        // Use sync storage
+        const data = await chrome.storage.sync.get({ autoplayStopperEnabled: true, whitelist: [] });
         const isEnabled = data.autoplayStopperEnabled;
 
         if (!isEnabled) {

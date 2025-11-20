@@ -173,7 +173,7 @@ function addDomain() {
  */
 function updateWhitelist(domains) {
     currentDomains = domains;
-    chrome.storage.local.set({ whitelist: domains }, () => {
+    chrome.storage.sync.set({ whitelist: domains }, () => {
         renderDomainList(elements.searchInput.value);
     });
 }
@@ -273,7 +273,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // Load saved whitelist
-    chrome.storage.local.get({ whitelist: [] }, ({ whitelist }) => {
+    chrome.storage.sync.get({ whitelist: [] }, ({ whitelist }) => {
         currentDomains = whitelist;
         renderDomainList();
     });

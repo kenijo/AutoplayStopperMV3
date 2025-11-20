@@ -10,7 +10,7 @@ const toggleGlobalBtn = document.getElementById("toggleGlobal");
 const toggleSiteBtn = document.getElementById("toggleSite");
 
 // Load state
-chrome.storage.local.get({ autoplayStopperEnabled: true, whitelist: [] }, (data) => {
+chrome.storage.sync.get({ autoplayStopperEnabled: true, whitelist: [] }, (data) => {
     toggleGlobalBtn.textContent = data.autoplayStopperEnabled ? "Globally Enabled" : "Globally Disabled";
     toggleGlobalBtn.style.backgroundColor = data.autoplayStopperEnabled
         ? bodyStyle.getPropertyValue('--color_primary')
@@ -39,7 +39,7 @@ chrome.storage.local.get({ autoplayStopperEnabled: true, whitelist: [] }, (data)
 
 // Toggle site
 toggleSiteBtn.addEventListener("click", () => {
-    chrome.storage.local.get({ whitelist: [] }, (data) => {
+    chrome.storage.sync.get({ whitelist: [] }, (data) => {
         chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
             var activeTab = tabs[0];
 
@@ -58,7 +58,7 @@ toggleSiteBtn.addEventListener("click", () => {
                 added = true;
             }
 
-            chrome.storage.local.set({ whitelist }, () => {
+            chrome.storage.sync.set({ whitelist }, () => {
                 // Flash a color briefly to indicate change
                 toggleSiteBtn.style.backgroundColor = added
                     ? bodyStyle.getPropertyValue('--color_secondary') // green if added
@@ -73,9 +73,9 @@ toggleSiteBtn.addEventListener("click", () => {
 
 // Toggle global enable/disable
 toggleGlobalBtn.addEventListener("click", () => {
-    chrome.storage.local.get({ autoplayStopperEnabled: true }, (data) => {
+    chrome.storage.sync.get({ autoplayStopperEnabled: true }, (data) => {
         const newState = !data.autoplayStopperEnabled;
-        chrome.storage.local.set({ autoplayStopperEnabled: newState }, () => {
+        chrome.storage.sync.set({ autoplayStopperEnabled: newState }, () => {
             toggleGlobalBtn.textContent = newState ? "Globally Enabled" : "Globally Disabled";
             toggleGlobalBtn.style.backgroundColor = newState
                 ? bodyStyle.getPropertyValue('--color_primary')

@@ -17,14 +17,13 @@ chrome.storage.local.get({ debugEnabled: false }, (data) => {
 
 // Listen for debug flag changes
 chrome.storage.onChanged.addListener((changes, area) => {
-    if (area !== "local") return;
-    if (changes.debugEnabled) {
+    if (area === "local" && changes.debugEnabled) {
         debugEnabled = changes.debugEnabled.newValue;
         dlog("Debug logging", debugEnabled ? "ENABLED" : "DISABLED");
     }
 });
 
-chrome.storage.local.get({ whitelist: [] }, (data) => {
+chrome.storage.sync.get({ whitelist: [] }, (data) => {
     const hostname = location.hostname;
     const isWhitelisted = data.whitelist.some(domain => hostname.endsWith(domain));
 
@@ -37,7 +36,7 @@ chrome.storage.local.get({ whitelist: [] }, (data) => {
     let blockingEnabled = true;
 
     // Load initial toggle state (global enable/disable)
-    chrome.storage.local.get("autoplayStopperEnabled", (data) => {
+    chrome.storage.sync.get("autoplayStopperEnabled", (data) => {
         if (typeof data.autoplayStopperEnabled === "boolean") {
             blockingEnabled = data.autoplayStopperEnabled;
         }
@@ -67,7 +66,7 @@ chrome.storage.local.get({ whitelist: [] }, (data) => {
 
     // Live storage sync for global toggle + whitelist
     chrome.storage.onChanged.addListener((changes, area) => {
-        if (area !== "local") return;
+        if (area !== "sync") return;
 
         if (changes.autoplayStopperEnabled) {
             blockingEnabled = changes.autoplayStopperEnabled.newValue;
