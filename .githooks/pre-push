@@ -1,7 +1,7 @@
 #!/bin/sh
 
-# Disable debug mode before pushing
-node ".githooks/disableDebugMode.js.js"
+# To add this Git Hook to your project, create a symlink:
+# Windows: mklink /H pre-push ..\..\.githooks\pre-push
 
 # Update version in manifest.json before pushing
 node ".githooks/updateVersion.js"
