@@ -12,14 +12,27 @@ This extension is compatible with all Chromium based browsers such as: Brave, Ch
 
 Some browsers such as such as [Brave](https://brave.com), [Edge](https://www.microsoft.com/edge), [Vivaldi](https://vivaldi.com), or [Firefox](https://www.firefox.com) already have proper browser based autoplay blocking support. Just enable the browser's built-in autoplay blocking feature in the settings.
 
+## Roadmap
+
+Focus on improving website handling (such as instagram, tiktok, threads, youtube, etc.)
+
 ## Release Notes
 
 Report issues at <https://github.com/kenijo/AutoplayStopperMV3/issues>
 
-TODO
 
-- Improve support for exception list (allow autoplay ON or OFF)
-- Improve website handling (such as tiktok, threads, youtube)
+Version 2025.11.24
+
+- Change the UI from 2 buttons to 3 way switch to display "default" behavior
+- Improve behavior and icon status tracking across tabs and popup/option pages
+- Switch from whitelist to permission control (per-site permission: Default, Allow, Block)
+- Add option to choose default global behavior (Always Allow, Always Block)
+- Improved domain validation
+- Rework UI for better readability and consistency
+- Update icons to match the status of the extension
+- Automatically sync settings across devices
+- Update core logic for improved performances
+- Add option to enable debug logging
 
 Version 2025.09.26
 
