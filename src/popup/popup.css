@@ -45,24 +45,62 @@ h1 {
     gap: var(--spacing-md);
 }
 
-.btn-choice {
+.btn-wide {
     flex: 1;
-    font-size: 13px;
+    font-size: var(--font-size-md);
     font-weight: 600;
     width: 100%;
 }
 
-.btn-choice:hover {
-    opacity: var(--opacity);
+/* Segmented Control */
+.controls-container {
+    display: flex;
+    justify-content: center;
+    width: 100%;
 }
 
-/* Active States */
-.btn-choice.active-allow {
+.segmented-control {
+    background-color: var(--color-medium);
+    border-radius: var(--radius);
+    display: flex;
+    padding: var(--spacing-xs);
+    position: relative;
+    width: 100%;
+}
+
+.segmented-control input {
+    display: none;
+}
+
+.segmented-control label {
+    color: var(--color-text-dark);
+    cursor: pointer;
+    flex: 1;
+    font-size: var(--font-size-md);
+    font-weight: 600;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    text-align: center;
+    transition: all 0.2s ease;
+    z-index: 1;
+}
+
+/* Selected States */
+#perm-allow:checked~label[for="perm-allow"] {
     background-color: var(--color-secondary);
+    border-radius: var(--radius);
+    color: var(--color-text-light);
 }
 
-.btn-choice.active-block {
+#perm-default:checked~label[for="perm-default"] {
+    background-color: var(--color-background);
+    border-radius: var(--radius);
+    color: var(--color-text-dark);
+}
+
+#perm-block:checked~label[for="perm-block"] {
     background-color: var(--color-danger);
+    border-radius: var(--radius);
+    color: var(--color-text-light);
 }
 
 /* Toggle Switch */

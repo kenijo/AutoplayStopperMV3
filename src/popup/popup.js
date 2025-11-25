@@ -3,8 +3,10 @@
 // -------------------------
 
 const elements = {
-    btnAllow: document.getElementById("btnAllow"),
-    btnBlock: document.getElementById("btnBlock"),
+    permAllow: document.getElementById("perm-allow"),
+    permDefault: document.getElementById("perm-default"),
+    permBlock: document.getElementById("perm-block"),
+    permissionRadios: document.getElementsByName("site-permission"),
     currentDomain: document.getElementById("currentDomain"),
     openOptions: document.getElementById("openOptions"),
     toggleExtension: document.getElementById("toggleExtension")
@@ -34,11 +36,22 @@ document.addEventListener("DOMContentLoaded", async () => {
     setupListeners();
 });
 
+function enableSiteControls() {
+    elements.permAllow.disabled = false;
+    elements.permDefault.disabled = false;
+    elements.permBlock.disabled = false;
+    // Visual indication is handled by CSS (opacity on label) or we can add a class
+    document.querySelector('.segmented-control').style.opacity = "";
+    document.querySelector('.segmented-control').style.pointerEvents = "";
+}
+
 function disableSiteControls() {
-    elements.btnAllow.disabled = true;
-    elements.btnBlock.disabled = true;
-    elements.btnAllow.style.opacity = "0.5";
-    elements.btnBlock.style.opacity = "0.5";
+    elements.permAllow.disabled = true;
+    elements.permDefault.disabled = true;
+    elements.permBlock.disabled = true;
+    // Visual indication is handled by CSS (opacity on label) or we can add a class
+    document.querySelector('.segmented-control').style.opacity = "0.5";
+    document.querySelector('.segmented-control').style.pointerEvents = "none";
 }
 
 async function loadSettings() {
@@ -49,23 +62,24 @@ async function loadSettings() {
 
     // Master Switch
     elements.toggleExtension.checked = data.extensionEnabled;
+    if (!data.extensionEnabled) {
+        disableSiteControls();
+    }
 
-    // Site Buttons
+    // Site Permission Switch
     if (currentHostname) {
         const setting = data.siteSettings[currentHostname]; // "allow" | "block" | undefined
-        updateButtonStates(setting);
+        updateSwitchState(setting);
     }
 }
 
-function updateButtonStates(setting) {
-    // Reset classes
-    elements.btnAllow.classList.remove("active-allow");
-    elements.btnBlock.classList.remove("active-block");
-
+function updateSwitchState(setting) {
     if (setting === "allow") {
-        elements.btnAllow.classList.add("active-allow");
+        elements.permAllow.checked = true;
     } else if (setting === "block") {
-        elements.btnBlock.classList.add("active-block");
+        elements.permBlock.checked = true;
+    } else {
+        elements.permDefault.checked = true;
     }
 }
 
@@ -73,50 +87,33 @@ function setupListeners() {
     // Master Switch
     elements.toggleExtension.addEventListener("change", (e) => {
         chrome.storage.sync.set({ extensionEnabled: e.target.checked });
+        if (e.target.checked && elements.currentDomain.textContent !== "System Page") {
+            enableSiteControls();
+        } else {
+            disableSiteControls();
+        }
     });
 
-    // Allow Button
-    elements.btnAllow.addEventListener("click", async () => {
-        if (!currentHostname) return;
+    // Permission Switch
+    elements.permissionRadios.forEach(radio => {
+        radio.addEventListener("change", async (e) => {
+            if (!currentHostname) return;
 
-        const data = await chrome.storage.sync.get({ siteSettings: {} });
-        const currentSetting = data.siteSettings[currentHostname];
+            const val = e.target.value;
+            const data = await chrome.storage.sync.get({ siteSettings: {} });
+            let newSettings = { ...data.siteSettings };
 
-        let newSettings = { ...data.siteSettings };
+            if (val === "allow") {
+                newSettings[currentHostname] = "allow";
+            } else if (val === "block") {
+                newSettings[currentHostname] = "block";
+            } else {
+                // Default
+                delete newSettings[currentHostname];
+            }
 
-        if (currentSetting === "allow") {
-            // Toggle OFF (remove setting)
-            delete newSettings[currentHostname];
-            updateButtonStates(undefined);
-        } else {
-            // Set to ALLOW
-            newSettings[currentHostname] = "allow";
-            updateButtonStates("allow");
-        }
-
-        await chrome.storage.sync.set({ siteSettings: newSettings });
-    });
-
-    // Block Button
-    elements.btnBlock.addEventListener("click", async () => {
-        if (!currentHostname) return;
-
-        const data = await chrome.storage.sync.get({ siteSettings: {} });
-        const currentSetting = data.siteSettings[currentHostname];
-
-        let newSettings = { ...data.siteSettings };
-
-        if (currentSetting === "block") {
-            // Toggle OFF (remove setting)
-            delete newSettings[currentHostname];
-            updateButtonStates(undefined);
-        } else {
-            // Set to BLOCK
-            newSettings[currentHostname] = "block";
-            updateButtonStates("block");
-        }
-
-        await chrome.storage.sync.set({ siteSettings: newSettings });
+            await chrome.storage.sync.set({ siteSettings: newSettings });
+        });
     });
 
     // Options

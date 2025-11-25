@@ -22,13 +22,21 @@
             <p id="currentDomain">...</p>
         </div>
 
-        <div class="controls">
-            <button id="btnAllow" class="btn btn-choice">Always Allow</button>
-            <button id="btnBlock" class="btn btn-choice">Always Block</button>
+        <div class="controls-container">
+            <div class="segmented-control">
+                <input type="radio" name="site-permission" id="perm-default" value="default">
+                <label for="perm-default">Default</label>
+
+                <input type="radio" name="site-permission" id="perm-allow" value="allow">
+                <label for="perm-allow">Allow</label>
+
+                <input type="radio" name="site-permission" id="perm-block" value="block">
+                <label for="perm-block">Block</label>
+            </div>
         </div>
 
         <div class="controls">
-            <button id="openOptions" class="btn btn-choice">Options</button>
+            <button id="openOptions" class="btn btn-wide">Options</button>
         </div>
     </div>
 
