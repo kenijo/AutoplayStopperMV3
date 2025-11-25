@@ -20,7 +20,6 @@ Focus on improving website handling (such as instagram, tiktok, threads, youtube
 
 Report issues at <https://github.com/kenijo/AutoplayStopperMV3/issues>
 
-
 Version 2025.11.24
 
 - Change the UI from 2 buttons to 3 way switch to display "default" behavior
