@@ -2,7 +2,7 @@
 
 ## Description
 
-Blocks unwanted media autoplay on websites, with per-site whitelist control.
+Blocks unwanted media autoplay on websites, with per-site permission control.
 
 It is inspired by the original [AutoplayStopper](https://chromewebstore.google.com/detail/AutoplayStopper/ejddcgojdblidajhngkogefpkknnebdh) Chrome Extension. ([Repository of the original extension](https://github.com/kenijo/AutoplayStopperMV2))
 

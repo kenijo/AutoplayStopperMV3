@@ -3,47 +3,76 @@
 // -------------------------
 
 const ICON_PATHS = {
-    on: {
-        "16": "icons/icon16_on.png",
-        "32": "icons/icon32_on.png",
-        "48": "icons/icon48_on.png",
-        "128": "icons/icon128_on.png",
+    allowed: {
+        "16": "icons/allow_16.png",
+        "32": "icons/allow_32.png",
+        "48": "icons/allow_48.png",
+        "128": "icons/allow_128.png",
     },
-    off: {
-        "16": "icons/icon16_off.png",
-        "32": "icons/icon32_off.png",
-        "48": "icons/icon48_off.png",
-        "128": "icons/icon128_off.png",
+    blocked: {
+        "16": "icons/block_16.png",
+        "32": "icons/block_32.png",
+        "48": "icons/block_48.png",
+        "128": "icons/block_128.png",
     },
     disabled: {
-        "16": "icons/icon16.png",
-        "32": "icons/icon32.png",
-        "48": "icons/icon48.png",
-        "128": "icons/icon128.png",
+        "16": "icons/default_16.png",
+        "32": "icons/default_32.png",
+        "48": "icons/default_48.png",
+        "128": "icons/default_128.png",
     }
 };
 
-// On install, ensure default state and migrate from local to sync
+// Default Settings
+const DEFAULTS = {
+    extensionEnabled: true,      // Master switch
+    globalBehavior: "block",     // "block" or "allow"
+    siteSettings: {}             // Map<hostname, "allow" | "block">
+};
+
+// On install, ensure default state and migrate from legacy
 chrome.runtime.onInstalled.addListener(async () => {
-    // 1. Check if we have sync data
-    const syncData = await chrome.storage.sync.get(["autoplayStopperEnabled", "whitelist"]);
+    const syncData = await chrome.storage.sync.get(null);
+    const localData = await chrome.storage.local.get(null);
 
-    // 2. If sync is empty (new install or first run after update), check local
-    if (syncData.autoplayStopperEnabled === undefined) {
-        const localData = await chrome.storage.local.get(["autoplayStopperEnabled", "whitelist"]);
+    let newSettings = { ...DEFAULTS };
+    let needsUpdate = false;
 
-        if (localData.autoplayStopperEnabled !== undefined) {
-            // Migrate local -> sync
-            await chrome.storage.sync.set({
-                autoplayStopperEnabled: localData.autoplayStopperEnabled,
-                whitelist: localData.whitelist || []
-            });
-            // Optional: Clear local to avoid confusion, or keep as backup. 
-            // For now, we'll leave it but future reads will use sync.
-        } else {
-            // New install, set defaults
-            await chrome.storage.sync.set({ autoplayStopperEnabled: true, whitelist: [] });
-        }
+    // 1. Check for legacy "whitelist" (sync or local)
+    const legacyWhitelist = syncData.whitelist || localData.whitelist;
+    if (Array.isArray(legacyWhitelist) && legacyWhitelist.length > 0) {
+        // Migrate whitelist -> siteSettings (ALLOW)
+        legacyWhitelist.forEach(domain => {
+            newSettings.siteSettings[domain] = "allow";
+        });
+        needsUpdate = true;
+    }
+
+    // 2. Check for legacy "autoplayStopperEnabled" (Master Switch)
+    if (syncData.autoplayStopperEnabled !== undefined) {
+        newSettings.extensionEnabled = syncData.autoplayStopperEnabled;
+        needsUpdate = true;
+    } else if (localData.autoplayStopperEnabled !== undefined) {
+        newSettings.extensionEnabled = localData.autoplayStopperEnabled;
+        needsUpdate = true;
+    }
+
+    // 3. Preserve existing new-style settings if they exist
+    if (syncData.siteSettings) {
+        newSettings = { ...newSettings, ...syncData };
+        needsUpdate = false; // Already up to date presumably, unless we just merged legacy
+    } else {
+        // First time with new structure, force save
+        needsUpdate = true;
+    }
+
+    if (needsUpdate) {
+        // Remove legacy keys to avoid confusion? 
+        // Ideally yes, but let's just overwrite with new structure.
+        // We'll keep it simple and just set the new keys.
+        await chrome.storage.sync.set(newSettings);
+        await chrome.storage.sync.remove(["whitelist", "autoplayStopperEnabled"]); // Cleanup legacy
+        console.log("Migrated settings to new format:", newSettings);
     }
 });
 
@@ -68,8 +97,7 @@ chrome.tabs.onActivated.addListener(async (activeInfo) => {
 
 // Update icon when storage changes
 chrome.storage.onChanged.addListener(async (changes, area) => {
-    // Listen to 'sync' instead of 'local'
-    if (area === "sync" && (changes.autoplayStopperEnabled || changes.whitelist)) {
+    if (area === "sync") {
         const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
         if (tabs[0] && tabs[0].url) {
             updateIcon(tabs[0].id, tabs[0].url);
@@ -80,35 +108,57 @@ chrome.storage.onChanged.addListener(async (changes, area) => {
 // Core logic: set icon & title
 async function updateIcon(tabId, url) {
     try {
-        // Use sync storage
-        const data = await chrome.storage.sync.get({ autoplayStopperEnabled: true, whitelist: [] });
-        const isEnabled = data.autoplayStopperEnabled;
+        if (!url.startsWith("http")) {
+            // Internal pages, etc.
+            await chrome.action.setIcon({ tabId, path: ICON_PATHS["disabled"] });
+            await chrome.action.setTitle({ tabId, title: "AutoplayStopper" });
+            return;
+        }
 
-        if (!isEnabled) {
+        const data = await chrome.storage.sync.get(DEFAULTS);
+
+        // 1. Master Switch
+        if (!data.extensionEnabled) {
             await chrome.action.setIcon({ tabId, path: ICON_PATHS["disabled"] });
             await chrome.action.setTitle({ tabId, title: "AutoplayStopper: Disabled" });
             return;
         }
 
-        let isWhitelisted = false;
-        try {
-            const hostname = new URL(url).hostname;
-            isWhitelisted = data.whitelist.some((d) => hostname.endsWith(d));
-        } catch (e) {
-            // Invalid URL, assume not whitelisted
+        // 2. Determine Site Status
+        const hostname = new URL(url).hostname;
+        let status = data.globalBehavior; // Default
+
+        // Check specific site settings (exact match or subdomain)
+        // We need to find the most specific match. 
+        // For now, let's stick to the existing logic: check if hostname ends with a key.
+        // But with a map, we should probably iterate keys.
+        // Optimization: If we have many keys, this is slow. But usually < 100.
+
+        // Check for exact match or parent domain match
+        // e.g. "google.com" setting applies to "mail.google.com"
+        // We prioritize the longest matching suffix.
+
+        let longestMatchLength = 0;
+
+        for (const [domain, setting] of Object.entries(data.siteSettings)) {
+            if (hostname === domain || hostname.endsWith("." + domain)) {
+                if (domain.length > longestMatchLength) {
+                    longestMatchLength = domain.length;
+                    status = setting;
+                }
+            }
         }
 
-        if (isWhitelisted) {
-            await chrome.action.setIcon({ tabId, path: ICON_PATHS["off"] });
-            await chrome.action.setTitle({ tabId, title: "AutoplayStopper: OFF" });
+        if (status === "allow") {
+            await chrome.action.setIcon({ tabId, path: ICON_PATHS["allowed"] });
+            await chrome.action.setTitle({ tabId, title: "AutoplayStopper: Allowed" });
         } else {
-            await chrome.action.setIcon({ tabId, path: ICON_PATHS["on"] });
-            await chrome.action.setTitle({ tabId, title: "AutoplayStopper: ON" });
+            await chrome.action.setIcon({ tabId, path: ICON_PATHS["blocked"] });
+            await chrome.action.setTitle({ tabId, title: "AutoplayStopper: Blocking" });
         }
+
     } catch (err) {
         console.error("Error updating icon:", err);
-        // Fallback
-        chrome.action.setIcon({ tabId, path: ICON_PATHS["on"] });
-        chrome.action.setTitle({ tabId, title: "AutoplayStopper" });
+        chrome.action.setIcon({ tabId, path: ICON_PATHS["disabled"] });
     }
 }

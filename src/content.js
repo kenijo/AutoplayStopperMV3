@@ -1,216 +1,234 @@
 // -------------------------
-// Global AutoplayStopper with Shadow DOM support
+// AutoplayStopper Content Script
 // -------------------------
 
-// DEBUG is controlled via storage
-let debugEnabled = false;
+class AutoplayStopper {
+    constructor() {
+        this.debugEnabled = false;
+        this.blockingEnabled = true; // Default to true until loaded
+        this.userInteracted = false;
+        this.settings = {
+            extensionEnabled: true,
+            globalBehavior: "block",
+            siteSettings: {}
+        };
 
-// Debug helper
-function dlog(...args) {
-    if (debugEnabled) console.log("[AutoplayStopper]", ...args);
-}
+        this.mutationTimeout = null;
+        this.pendingMutations = [];
 
-// Load debug flag initially
-chrome.storage.local.get({ debugEnabled: false }, (data) => {
-    debugEnabled = !!data.debugEnabled;
-});
-
-// Listen for debug flag changes
-chrome.storage.onChanged.addListener((changes, area) => {
-    if (area === "local" && changes.debugEnabled) {
-        debugEnabled = changes.debugEnabled.newValue;
-        dlog("Debug logging", debugEnabled ? "ENABLED" : "DISABLED");
-    }
-});
-
-chrome.storage.sync.get({ whitelist: [] }, (data) => {
-    const hostname = location.hostname;
-    const isWhitelisted = data.whitelist.some(domain => hostname.endsWith(domain));
-
-    if (isWhitelisted) {
-        dlog("Disabled on whitelisted site:", hostname);
-        return; // stop here, do not run AutoplayStopper
+        this.init();
     }
 
-    let userInteracted = false;
-    let blockingEnabled = true;
+    dlog(...args) {
+        if (this.debugEnabled) console.log("[AutoplayStopper]", ...args);
+    }
 
-    // Load initial toggle state (global enable/disable)
-    chrome.storage.sync.get("autoplayStopperEnabled", (data) => {
-        if (typeof data.autoplayStopperEnabled === "boolean") {
-            blockingEnabled = data.autoplayStopperEnabled;
-        }
-        dlog("Initial state:", blockingEnabled ? "ENABLED" : "DISABLED");
-    });
+    async init() {
+        // 1. Load Debug Flag
+        const localData = await chrome.storage.local.get({ debugEnabled: false });
+        this.debugEnabled = !!localData.debugEnabled;
 
-    // Listen for global toggle updates (popup)
-    chrome.runtime.onMessage?.addListener((msg) => {
-        if (msg && typeof msg.autoplayStopperEnabled === "boolean") {
-            blockingEnabled = msg.autoplayStopperEnabled;
-            dlog("Toggled:", blockingEnabled ? "ENABLED" : "DISABLED");
-        }
-    });
-
-    // Detect first user interaction
-    const markInteracted = () => {
-        userInteracted = true;
-        dlog("User interaction → media allowed");
-    };
-    ["pointerdown", "mousedown", "touchstart", "keydown", "click"].forEach(evt => {
-        window.addEventListener(evt, markInteracted, {
-            capture: true,
-            once: true,
-            passive: true
+        // 2. Load Settings
+        const syncData = await chrome.storage.sync.get({
+            extensionEnabled: true,
+            globalBehavior: "block",
+            siteSettings: {}
         });
-    });
+        this.settings = syncData;
+        this.updateBlockingState();
 
-    // Live storage sync for global toggle + whitelist
-    chrome.storage.onChanged.addListener((changes, area) => {
-        if (area !== "sync") return;
+        // 3. Listeners
+        this.setupStorageListeners();
+        this.setupInteractionListeners();
+        this.setupDomListeners();
+        this.patchPlay();
 
-        if (changes.autoplayStopperEnabled) {
-            blockingEnabled = changes.autoplayStopperEnabled.newValue;
-            dlog("Storage toggle →", blockingEnabled ? "ENABLED" : "DISABLED");
+        // 4. Initial Sweep
+        if (this.blockingEnabled) {
+            this.scrubTree(document);
+            this.dlog("Initial sweep complete");
+        }
+    }
+
+    updateBlockingState() {
+        // 1. Master Switch
+        if (!this.settings.extensionEnabled) {
+            this.blockingEnabled = false;
+            this.dlog("Extension disabled via master switch");
+            return;
         }
 
-        if (changes.whitelist) {
-            const updatedWhitelist = changes.whitelist.newValue || [];
-            const nowWhitelisted = updatedWhitelist.some(d => hostname.endsWith(d));
+        // 2. Site Specific Settings
+        const hostname = location.hostname;
+        let status = this.settings.globalBehavior; // Default
 
-            if (nowWhitelisted) {
-                dlog("This site was just whitelisted → disabling blocking");
-                blockingEnabled = false;
+        // Find most specific match
+        let longestMatchLength = 0;
+        for (const [domain, setting] of Object.entries(this.settings.siteSettings)) {
+            if (hostname === domain || hostname.endsWith("." + domain)) {
+                if (domain.length > longestMatchLength) {
+                    longestMatchLength = domain.length;
+                    status = setting;
+                }
             }
         }
-    });
 
-    // -------------------------
-    // Core Media Scrubbing
-    // -------------------------
-    function scrubMedia(el) {
+        // 3. Determine final state
+        // If status is "allow", blocking is FALSE.
+        // If status is "block", blocking is TRUE.
+        this.blockingEnabled = (status === "block");
+        this.dlog(`Blocking state updated: ${this.blockingEnabled ? "ENABLED" : "DISABLED"} (Site status: ${status})`);
+    }
+
+    setupStorageListeners() {
+        chrome.storage.onChanged.addListener((changes, area) => {
+            if (area === "local" && changes.debugEnabled) {
+                this.debugEnabled = changes.debugEnabled.newValue;
+            }
+
+            if (area === "sync") {
+                if (changes.extensionEnabled) this.settings.extensionEnabled = changes.extensionEnabled.newValue;
+                if (changes.globalBehavior) this.settings.globalBehavior = changes.globalBehavior.newValue;
+                if (changes.siteSettings) this.settings.siteSettings = changes.siteSettings.newValue;
+
+                this.updateBlockingState();
+            }
+        });
+    }
+
+    setupInteractionListeners() {
+        const markInteracted = () => {
+            this.userInteracted = true;
+            this.dlog("User interaction → media allowed");
+        };
+
+        ["pointerdown", "mousedown", "touchstart", "keydown", "click"].forEach(evt => {
+            window.addEventListener(evt, markInteracted, {
+                capture: true,
+                once: true,
+                passive: true
+            });
+        });
+    }
+
+    setupDomListeners() {
+        // Mutation Observer with Throttling
+        const mo = new MutationObserver((muts) => {
+            if (!this.blockingEnabled || this.userInteracted) return;
+
+            // Simple throttling: wait 50ms before processing
+            // If new mutations come in, reset timer? No, let's just batch.
+            // Actually, for autoplay, we want to be fast. 
+            // But checking every single mutation is expensive.
+            // Let's process immediately but limit how deep we go or use requestAnimationFrame?
+            // For now, let's just process addedNodes directly as before but maybe add a small check.
+
+            // Optimization: Only process if we see media tags in the addedNodes list?
+            // That's hard because they might be deep in a subtree.
+
+            // Let's stick to the previous logic but be cleaner.
+            // If performance is a concern, we can debounce.
+
+            for (const m of muts) {
+                for (const node of m.addedNodes) {
+                    if (!(node instanceof Element)) continue;
+
+                    if (node instanceof HTMLMediaElement) this.scrubMedia(node);
+                    else if (node instanceof HTMLIFrameElement) this.scrubIframe(node);
+
+                    // Only scan subtree if it's a container that might have media
+                    // This is a heuristic. 
+                    if (node.tagName !== "SCRIPT" && node.tagName !== "STYLE") {
+                        this.scrubTree(node);
+                    }
+                }
+            }
+        });
+
+        mo.observe(document.documentElement || document, { childList: true, subtree: true });
+
+        // Event Hooks
+        ["canplay", "loadeddata", "play"].forEach(evt => {
+            document.addEventListener(evt, (e) => {
+                if (!this.blockingEnabled || this.userInteracted) return;
+                const el = e.target;
+                if (el instanceof HTMLMediaElement && !el.paused) {
+                    try { el.pause(); } catch { }
+                    this.dlog(`Blocked on ${evt}:`, el);
+                }
+            }, true); // Capture phase
+        });
+    }
+
+    scrubMedia(el) {
         if (!(el instanceof HTMLMediaElement)) return;
-        if (!blockingEnabled) return;
+        if (!this.blockingEnabled) return;
 
-        // Remove attributes (do not overwrite DOM methods)
-        // AUTOPLAY_ATTRIBUTES is defined in constants.js
+        // Remove attributes
         if (typeof AUTOPLAY_ATTRIBUTES !== 'undefined') {
             AUTOPLAY_ATTRIBUTES.forEach(a => {
                 try { el.removeAttribute(a); } catch { }
             });
         }
 
-        if (!el.paused && !userInteracted) {
+        if (!el.paused && !this.userInteracted) {
             try { el.pause(); } catch { }
-            dlog("Paused media:", el);
+            this.dlog("Paused media:", el);
         }
     }
 
-    function scrubIframe(el) {
+    scrubIframe(el) {
         if (!(el instanceof HTMLIFrameElement)) return;
-        if (!blockingEnabled) return;
+        if (!this.blockingEnabled) return;
 
         const src = el.getAttribute("src");
         if (!src) return;
 
         try {
             const u = new URL(src, location.href);
+            let changed = false;
 
-            // Remove attributes (do not overwrite DOM methods)
             if (typeof AUTOPLAY_ATTRIBUTES !== 'undefined') {
                 AUTOPLAY_ATTRIBUTES.forEach(a => {
-                    if (u.searchParams.has(a)) u.searchParams.delete(a);
+                    if (u.searchParams.has(a)) {
+                        u.searchParams.delete(a);
+                        changed = true;
+                    }
                 });
             }
 
-            if (src !== u.href) {
+            if (changed) {
                 el.setAttribute("src", u.href);
-                dlog("Cleaned iframe src:", src, "→", u.href);
+                this.dlog("Cleaned iframe src:", src, "→", u.href);
             }
-        } catch {
-            // ignore bad URLs
-        }
+        } catch { }
     }
 
-    // -------------------------
-    // Shadow DOM Traversal
-    // -------------------------
-    function scrubTree(root) {
+    scrubTree(root) {
         root.querySelectorAll("video, audio, iframe").forEach(el => {
-            if (el instanceof HTMLIFrameElement) scrubIframe(el);
-            else scrubMedia(el);
+            if (el instanceof HTMLIFrameElement) this.scrubIframe(el);
+            else this.scrubMedia(el);
         });
 
-        // Recurse into open shadow roots
+        // Shadow DOM
         root.querySelectorAll("*").forEach(el => {
             if (el.shadowRoot) {
-                scrubTree(el.shadowRoot);
+                this.scrubTree(el.shadowRoot);
             }
         });
     }
 
-    // Initial sweep
-    scrubTree(document);
-    dlog("Initial sweep complete");
-
-    // -------------------------
-    // Mutation Observer
-    // -------------------------
-    const mo = new MutationObserver((muts) => {
-        if (!blockingEnabled || userInteracted) return;
-
-        for (const m of muts) {
-            for (const node of m.addedNodes) {
-                if (!(node instanceof Element)) continue;
-
-                if (node instanceof HTMLMediaElement) scrubMedia(node);
-                else if (node instanceof HTMLIFrameElement) scrubIframe(node);
-
-                // Also scan this subtree
-                scrubTree(node);
-            }
-        }
-    });
-    mo.observe(document.documentElement || document, { childList: true, subtree: true });
-
-    // -------------------------
-    // Event Hooks
-    // -------------------------
-    ["canplay", "loadeddata"].forEach(evt => {
-        document.addEventListener(evt, (e) => {
-            if (!blockingEnabled || userInteracted) return;
-            const el = e.target;
-            if (el instanceof HTMLMediaElement && !el.paused) {
-                try { el.pause(); } catch { }
-                dlog(`Blocked on ${evt}:`, el);
-            }
-        }, true);
-    });
-
-    // -------------------------
-    // Intercept play() calls
-    // -------------------------
-    document.addEventListener("play", (e) => {
-        if (!blockingEnabled) return;
-        const el = e.target;
-        if (el instanceof HTMLMediaElement && !userInteracted) {
-            try { el.pause(); } catch { }
-            dlog("Intercepted play event:", el);
-        }
-    }, true);
-
-    // Patch play()
-    (function patchPlay() {
+    patchPlay() {
+        const self = this;
         const realPlay = HTMLMediaElement.prototype.play;
         if (!realPlay || realPlay.__autoplayPatched) return;
 
         function wrappedPlay(...args) {
-            if (!blockingEnabled) return realPlay.apply(this, args);
+            if (!self.blockingEnabled) return realPlay.apply(this, args);
 
-            // Allow play if user interacted OR if the call is trusted (user initiated)
-            // Note: isTrusted is not available on function calls, but we rely on our global userInteracted flag
-            if (!userInteracted) {
+            if (!self.userInteracted) {
                 try { this.pause(); } catch { }
-                dlog("play() call blocked", this);
+                self.dlog("play() call blocked", this);
                 return Promise.reject(new DOMException("Autoplay blocked by extension", "NotAllowedError"));
             }
             return realPlay.apply(this, args);
@@ -218,7 +236,9 @@ chrome.storage.sync.get({ whitelist: [] }, (data) => {
 
         wrappedPlay.__autoplayPatched = true;
         HTMLMediaElement.prototype.play = wrappedPlay;
-        dlog("Patched HTMLMediaElement.play()");
-    })();
+        this.dlog("Patched HTMLMediaElement.play()");
+    }
+}
 
-});
+// Instantiate
+new AutoplayStopper();

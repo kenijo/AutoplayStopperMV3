@@ -1,26 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
 
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>AutoplayStopper Options</title>
-        <link rel="stylesheet" href="options.css">
-    </head>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>AutoplayStopper Options</title>
+    <link rel="stylesheet" href="../common.css">
+    <link rel="stylesheet" href="options.css">
+</head>
 
-    <body>
-        <div class="container">
-            <header>
-                <h1>AutoplayStopper Options</h1>
-                <span id="appVersion" class="version"></span>
-            </header>
+<body>
+    <div class="container">
+        <header>
+            <h1>AutoplayStopper Options</h1>
+            <span id="appVersion" class="version"></span>
+        </header>
 
-            <section class="controls">
+        <section class="controls">
+            <div class="global-settings">
+                <label for="globalBehavior">Global Default Behavior:</label>
+                <select id="globalBehavior">
+                    <option value="block">Always Block</option>
+                    <option value="allow">Always Allow</option>
+                </select>
+            </div>
+
+            <div class="global-settings">
                 <div class="export-import">
                     <button id="exportBtn" class="btn btn-primary">Export Settings</button>
                     <button id="importBtn" class="btn btn-primary">Import Settings</button>
                     <input type="file" id="importFile" accept=".json" style="display:none">
-                    <button id="resetBtn" class="btn btn-danger">Reset Whitelist</button>
+                    <button id="resetBtn" class="btn btn-danger">Reset All</button>
                 </div>
                 <div class="debug-section">
                     <label class="debug-label">
@@ -28,31 +38,35 @@
                         <input type="checkbox" id="debugToggle">
                     </label>
                 </div>
-            </section>
+            </div>
+        </section>
 
-            <section class="whitelist">
-                <h2>Whitelist Management</h2>
-                <p>Add domains to exclude from autoplay blocking (e.g., "youtube.com")</p>
+        <section>
+            <h2>Site Settings</h2>
+            <p>Manage exceptions for specific sites.</p>
 
-                <div class="input-group">
-                    <input type="search" id="domainInput" placeholder="example.com" aria-label="Domain to whitelist">
-                    <button id="addDomain" class="btn btn-primary">Add Domain</button>
-                </div>
+            <div class="input-group">
+                <input type="search" id="domainInput" placeholder="example.com" aria-label="Domain">
+                <select id="newDomainStatus">
+                    <option value="allow">Allow</option>
+                    <option value="block">Block</option>
+                </select>
+                <button id="addDomain" class="btn btn-primary">Add Site</button>
+            </div>
 
-                <div class="search-group">
-                    <input type="search" id="searchInput" placeholder="Search domains..."
-                        aria-label="Search whitelisted domains">
-                </div>
+            <div class="input-group">
+                <input type="search" id="searchInput" placeholder="Search sites..." aria-label="Search sites">
+            </div>
 
-                <div class="domain-list">
-                    <ul id="domainList" aria-label="Whitelisted domains"></ul>
-                </div>
-            </section>
-        </div>
+            <div class="domain-list">
+                <ul id="domainList" class="domain-list-item" aria-label="Site list"></ul>
+            </div>
+        </section>
+    </div>
 
-        <div id="toast"></div>
+    <div id="toast"></div>
 
-        <script src="options.js"></script>
-    </body>
+    <script src="options.js"></script>
+</body>
 
 </html>

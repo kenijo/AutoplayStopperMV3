@@ -1,0 +1,111 @@
+:root {
+    /* Colors */
+    --color-background: #FFFFFF;
+    --color-border: #81A1C1;
+    --color-browser: #F7F7F7;
+    --color-danger: #BF616A;
+    --color-dark: #2E3440;
+    --color-light: #D8DEE9;
+    --color-medium: #E5E9F0;
+    --color-primary: #81A1C1;
+    --color-secondary: #A3BE8C;
+    --color-text-dark: #4C566A;
+    --color-text-light: #ECEFF4;
+    --opacity: 0.8;
+
+    /* Typography */
+    --font-family: 'Roboto', 'Arial', sans-serif;
+    --font-size-base: .9em;
+    --font-size-sm: .5em;
+    --font-size-md: 1em;
+    --font-size-lg: 1.5em;
+
+    /* Spacing & Layout */
+    --radius: 4px;
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+    --spacing-xl: 32px;
+
+    /* Shadows */
+    --shadow: 0 2px 8px color-mix(in srgb, var(--color-dark) 10%, transparent);
+}
+
+body {
+    background-color: var(--color-browser);
+    color: var(--color-text-dark);
+    font-family: var(--font-family);
+    font-size: var(--font-size-base);
+    margin: 0;
+}
+
+/* Common Button Styles */
+.btn {
+    align-items: center;
+    background-color: var(--color-medium);
+    border-radius: var(--radius);
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    font-size: var(--font-size-base);
+    gap: var(--spacing-sm);
+    justify-content: center;
+    padding: var(--spacing-sm) var(--spacing-md);
+    transition: all 0.2s ease;
+}
+
+.btn:hover {
+    opacity: var(--opacity);
+}
+
+.btn:active {
+    transform: translateY(1px);
+}
+
+.btn-primary {
+    background-color: var(--color-primary);
+    color: var(--color-text-light);
+}
+
+.btn-danger {
+    background-color: var(--color-danger);
+    color: var(--color-text-light);
+}
+
+.btn-small {
+    font-size: var(--font-size-sm);
+    padding: var(--spacing-xs) var(--spacing-sm);
+}
+
+/* Common Form Styles */
+input[type="text"],
+input[type="search"],
+select {
+    background-color: var(--color-background);
+    border-radius: var(--radius);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-dark);
+    font-family: inherit;
+    font-size: var(--font-size-base);
+    padding: var(--spacing-sm) var(--spacing-md);
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+input[type="text"]:focus,
+input[type="search"]:focus,
+select:focus {
+    border-color: var(--color-border);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-border) 25%, transparent);
+    outline: none;
+}
+
+/* Custom Select Style */
+select {
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23333%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+    background-position: right 12px top 50%;
+    background-repeat: no-repeat;
+    background-size: 10px auto;
+    padding-right: var(--spacing-xl);
+}

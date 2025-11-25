@@ -4,84 +4,25 @@
 
 // DOM Elements
 const elements = {
+    globalBehavior: document.getElementById("globalBehavior"),
     addButton: document.getElementById("addDomain"),
     domainInput: document.getElementById("domainInput"),
+    newDomainStatus: document.getElementById("newDomainStatus"),
     domainList: document.getElementById("domainList"),
     exportBtn: document.getElementById("exportBtn"),
     importBtn: document.getElementById("importBtn"),
     importFile: document.getElementById("importFile"),
-    message: document.getElementById("message"),
     resetBtn: document.getElementById("resetBtn"),
     searchInput: document.getElementById("searchInput")
 };
 
 // State
-let currentDomains = [];
+let siteSettings = {}; // Map<domain, "allow"|"block">
 
 // -------------------------
 // Utilities
 // -------------------------
 
-/**
- * Creates ripple effect on button click
- * @param {HTMLElement} button - Button element to add ripple to
- */
-function setupRipple(button) {
-    button.style.position = "relative";
-    button.style.overflow = "hidden";
-
-    button.addEventListener("click", (e) => {
-        const ripple = document.createElement("span");
-        const diameter = Math.max(button.clientWidth, button.clientHeight);
-        const radius = diameter / 2;
-
-        Object.assign(ripple.style, {
-            width: `${diameter}px`,
-            height: `${diameter}px`,
-            left: `${e.clientX - button.offsetLeft - radius}px`,
-            top: `${e.clientY - button.offsetTop - radius}px`,
-            position: "absolute",
-            borderRadius: "50%",
-            backgroundColor: "var(--color_light)",
-            transform: "scale(0)",
-            animation: "ripple 600ms linear",
-            pointerEvents: "none"
-        });
-
-        ripple.classList.add("ripple");
-        button.appendChild(ripple);
-
-        // Clean up after animation
-        setTimeout(() => ripple.remove(), 600);
-    });
-}
-
-/**
- * Validates domain format
- * @param {string} domain - Domain to validate
- * @returns {boolean} True if valid domain
- * - Supports normal domains (example.com)
- * - Supports localhost
- * - Supports *.local internal domains (office.local)
- */
-function isValidDomain(domain) {
-    domain = domain.trim().toLowerCase();
-
-    // allow localhost
-    if (domain === "localhost") return true;
-
-    // allow *.local (dev.local, internal.local, etc)
-    if (domain.endsWith(".local")) return true;
-
-    // normal domain validation
-    return /^(?!-)([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/.test(domain);
-}
-
-/**
- * Shows temporary message
- * @param {string} text - Message text
- * @param {boolean} [isError=true] - Whether message is error
- */
 function showMessage(text, isError = true) {
     const toast = document.getElementById("toast");
     const bodyStyle = window.getComputedStyle(document.body)
@@ -95,239 +36,200 @@ function showMessage(text, isError = true) {
     }, 3000);
 }
 
+function isValidDomain(domain) {
+    domain = domain.trim().toLowerCase();
+    if (domain === "localhost") return true;
+    if (domain.endsWith(".local")) return true;
+    return /^(?!-)([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/.test(domain);
+}
+
 // -------------------------
-// Domain Management
+// Logic
 // -------------------------
 
-/**
- * Renders domain list with optional filter
- * @param {string} [filter=""] - Filter string
- */
-function renderDomainList(filter = "") {
+function renderList(filter = "") {
     elements.domainList.innerHTML = "";
 
-    const filtered = [...currentDomains]
-        .filter(d => d.toLowerCase().includes(filter.toLowerCase()))
-        .sort((a, b) => a.localeCompare(b));
+    const entries = Object.entries(siteSettings)
+        .filter(([domain]) => domain.toLowerCase().includes(filter.toLowerCase()))
+        .sort(([a], [b]) => a.localeCompare(b));
 
-    filtered.forEach(domain => {
+    entries.forEach(([domain, status]) => {
         const li = document.createElement("li");
-        const span = document.createElement("span");
-        span.textContent = domain;
+        li.className = "domain-item";
+
+        const info = document.createElement("span");
+        info.className = "domain-info";
+        info.innerHTML = `<span class="status-badge ${status}">${status.toUpperCase()}</span><strong>${domain}</strong>`;
+
+        const actions = document.createElement("div");
+        actions.className = "actions";
+
+        const toggleBtn = document.createElement("button");
+        toggleBtn.textContent = status === "allow" ? "Block" : "Allow";
+        toggleBtn.className = "btn btn-small";
+        toggleBtn.onclick = () => updateDomainStatus(domain, status === "allow" ? "block" : "allow");
 
         const removeBtn = document.createElement("button");
         removeBtn.textContent = "Remove";
-        removeBtn.className = "btn btn-danger";
-        setupRipple(removeBtn);
+        removeBtn.className = "btn btn-danger btn-small";
+        removeBtn.onclick = () => removeDomain(domain);
 
-        removeBtn.addEventListener("click", () => removeDomain(domain));
-
-        li.append(span, removeBtn);
+        actions.append(toggleBtn, removeBtn);
+        li.append(info, actions);
         elements.domainList.appendChild(li);
     });
 }
 
-/**
- * Removes domain from whitelist
- * @param {string} domain - Domain to remove
- */
-function removeDomain(domain) {
-    const newDomains = currentDomains.filter(d => d !== domain);
-    updateWhitelist(newDomains);
+async function updateDomainStatus(domain, status) {
+    siteSettings[domain] = status;
+    await chrome.storage.sync.set({ siteSettings });
+    renderList(elements.searchInput.value);
+}
+
+async function removeDomain(domain) {
+    delete siteSettings[domain];
+    await chrome.storage.sync.set({ siteSettings });
+    renderList(elements.searchInput.value);
     showMessage(`Removed ${domain}`, false);
 }
 
-/**
- * Adds domain to whitelist
- */
-function addDomain() {
+async function addDomain() {
     let domain = elements.domainInput.value.trim();
+    const status = elements.newDomainStatus.value;
+
     if (!domain) {
         showMessage("Please enter a domain");
         return;
     }
 
-    // Clean domain input
-    domain = domain
-        .replace(/^https?:\/\//, "")
-        .replace(/\/.*$/, "");
+    domain = domain.replace(/^https?:\/\//, "").replace(/\/.*$/, "");
 
     if (!isValidDomain(domain)) {
-        showMessage("Invalid domain format (e.g., example.com, localhost, dev.local)");
+        showMessage("Invalid domain format");
         return;
     }
 
-    if (currentDomains.includes(domain)) {
-        showMessage("Domain already whitelisted");
-        return;
-    }
+    siteSettings[domain] = status;
+    await chrome.storage.sync.set({ siteSettings });
 
-    updateWhitelist([...currentDomains, domain]);
     elements.domainInput.value = "";
-    showMessage(`Added ${domain}`, false);
-}
-
-/**
- * Updates whitelist in storage and UI
- * @param {string[]} domains - New domain list
- */
-function updateWhitelist(domains) {
-    currentDomains = domains;
-    chrome.storage.sync.set({ whitelist: domains }, () => {
-        renderDomainList(elements.searchInput.value);
-    });
+    renderList(elements.searchInput.value);
+    showMessage(`Added ${domain} as ${status.toUpperCase()}`, false);
 }
 
 // -------------------------
 // Import/Export
 // -------------------------
 
-/**
- * Exports whitelist to JSON file
- */
-function exportWhitelist() {
-    const validDomains = currentDomains
-        .map(d => (typeof d === "string" ? d.trim() : ""))
-        .filter(isValidDomain);
+function exportSettings() {
+    const data = {
+        siteSettings,
+        exportedAt: new Date().toISOString()
+    };
 
-    if (validDomains.length === 0) {
-        showMessage("No valid domains to export");
-        return;
-    }
-
-    const blob = new Blob([JSON.stringify(validDomains, null, 2)], {
-        type: "application/json"
-    });
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
-
     const a = document.createElement("a");
     a.href = url;
-    a.download = "autoplaystopper-whitelist.json";
+    a.download = "autoplaystopper-settings.json";
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 
-    showMessage("Whitelist exported", false);
+    showMessage("Settings exported", false);
 }
 
-/**
- * Handles file import
- * @param {Event} e - Change event
- */
 function handleImport(e) {
     const file = e.target.files[0];
     if (!file) return;
 
     const reader = new FileReader();
-    reader.onload = (event) => {
+    reader.onload = async (event) => {
         try {
             const imported = JSON.parse(event.target.result);
-            if (!Array.isArray(imported)) {
-                showMessage("Invalid format (must be JSON array)");
+
+            // Support legacy import (array of strings)
+            let newSettings = {};
+            if (Array.isArray(imported)) {
+                imported.forEach(d => {
+                    if (typeof d === "string" && isValidDomain(d)) newSettings[d] = "allow";
+                });
+            } else if (imported.siteSettings) {
+                newSettings = imported.siteSettings;
+            } else {
+                throw new Error("Invalid format");
+            }
+
+            if (Object.keys(newSettings).length === 0) {
+                showMessage("No valid settings found");
                 return;
             }
 
-            const validDomains = imported
-                .map(d => (typeof d === "string" ? d.trim() : ""))
-                .filter(isValidDomain);
-
-            if (validDomains.length === 0) {
-                showMessage("No valid domains found");
-                return;
+            if (confirm("Overwrite current settings? Cancel to merge.")) {
+                siteSettings = newSettings;
+            } else {
+                siteSettings = { ...siteSettings, ...newSettings };
             }
 
-            const shouldOverwrite = confirm(
-                "Overwrite current whitelist?\n\n" +
-                "OK = Overwrite, Cancel = Merge"
-            );
-
-            const newList = shouldOverwrite
-                ? validDomains
-                : [...new Set([...currentDomains, ...validDomains])];
-
-            updateWhitelist(newList.sort());
-            showMessage(shouldOverwrite ? "Whitelist overwritten" : "Whitelist merged", false);
+            await chrome.storage.sync.set({ siteSettings });
+            renderList(elements.searchInput.value);
+            showMessage("Import successful", false);
         } catch {
             showMessage("Import failed (invalid file)");
         }
     };
     reader.readAsText(file);
-    e.target.value = ""; // Reset file input
+    e.target.value = "";
 }
 
 // -------------------------
-// Event Listeners
+// Init
 // -------------------------
 
-// Initialize
-document.addEventListener("DOMContentLoaded", () => {
-    // Load existing debug flag
+document.addEventListener("DOMContentLoaded", async () => {
+    // Load Settings
+    const data = await chrome.storage.sync.get({
+        globalBehavior: "block",
+        siteSettings: {}
+    });
+
+    siteSettings = data.siteSettings;
+    elements.globalBehavior.value = data.globalBehavior;
+
+    renderList();
+
+    // Listeners
+    elements.globalBehavior.addEventListener("change", (e) => {
+        chrome.storage.sync.set({ globalBehavior: e.target.value });
+        showMessage("Global default updated", false);
+    });
+
+    elements.addButton.addEventListener("click", addDomain);
+    elements.exportBtn.addEventListener("click", exportSettings);
+    elements.importBtn.addEventListener("click", () => elements.importFile.click());
+    elements.importFile.addEventListener("change", handleImport);
+
+    elements.resetBtn.addEventListener("click", async () => {
+        if (confirm("Clear all site settings?")) {
+            siteSettings = {};
+            await chrome.storage.sync.set({ siteSettings });
+            renderList();
+            showMessage("All settings cleared", false);
+        }
+    });
+
+    elements.searchInput.addEventListener("input", () => renderList(elements.searchInput.value));
+
+    // Debug
     chrome.storage.local.get({ debugEnabled: false }, ({ debugEnabled }) => {
         document.getElementById("debugToggle").checked = debugEnabled;
     });
-
-    // Listen for changes to debug flag
     document.getElementById("debugToggle").addEventListener("change", (e) => {
         chrome.storage.local.set({ debugEnabled: e.target.checked });
     });
 
-    // Load saved whitelist
-    chrome.storage.sync.get({ whitelist: [] }, ({ whitelist }) => {
-        currentDomains = whitelist;
-        renderDomainList();
-    });
-
-    // Retrieve extension version
-    const version = chrome.runtime.getManifest().version;
-    document.getElementById("appVersion").textContent = `v${version}`;
-
-    // Setup ripple effects
-    setupRipple(elements.addButton);
-    setupRipple(elements.importBtn);
-    setupRipple(elements.exportBtn);
-    setupRipple(elements.resetBtn);
-
-    // Add domain
-    elements.addButton.addEventListener("click", addDomain);
-
-    // Import/export
-    elements.exportBtn.addEventListener("click", exportWhitelist);
-    elements.importBtn.addEventListener("click", () => elements.importFile.click());
-    elements.importFile.addEventListener("change", handleImport);
-
-    // Reset whitelist
-    elements.resetBtn.addEventListener("click", () => {
-        if (confirm("Clear entire whitelist? This cannot be undone.")) {
-            updateWhitelist([]);
-            showMessage("Whitelist cleared", false);
-        }
-    });
-
-    // Search functionality
-    elements.searchInput.addEventListener("input", () =>
-        renderDomainList(elements.searchInput.value)
-    );
-
-    // Keyboard shortcuts
-    elements.searchInput.addEventListener("keydown", (e) => {
-        if (e.key === "Escape") {
-            e.target.value = "";
-            renderDomainList();
-        }
-    });
-
-    elements.domainInput.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") addDomain();
-        if (e.key === "Escape") e.target.value = "";
-    });
-
-    // Global shortcuts
-    document.addEventListener("keydown", (e) => {
-        if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
-        if (e.key === "/") {
-            e.preventDefault();
-            elements.searchInput.focus();
-        }
-    });
+    // Version
+    document.getElementById("appVersion").textContent = `v${chrome.runtime.getManifest().version}`;
 });

@@ -1,90 +1,126 @@
 // -------------------------
-// Popup Script (with Live Updates)
+// Popup Script
 // -------------------------
 
-// Initialize buttons
-const bodyStyle = window.getComputedStyle(document.body);
-const currentDomainBtn = document.getElementById("currentDomain");
-const openOptionsBtn = document.getElementById("openOptions");
-const toggleGlobalBtn = document.getElementById("toggleGlobal");
-const toggleSiteBtn = document.getElementById("toggleSite");
+const elements = {
+    btnAllow: document.getElementById("btnAllow"),
+    btnBlock: document.getElementById("btnBlock"),
+    currentDomain: document.getElementById("currentDomain"),
+    openOptions: document.getElementById("openOptions"),
+    toggleExtension: document.getElementById("toggleExtension")
+};
 
-// Load state
-chrome.storage.sync.get({ autoplayStopperEnabled: true, whitelist: [] }, (data) => {
-    toggleGlobalBtn.textContent = data.autoplayStopperEnabled ? "Globally Enabled" : "Globally Disabled";
-    toggleGlobalBtn.style.backgroundColor = data.autoplayStopperEnabled
-        ? bodyStyle.getPropertyValue('--color_primary')
-        : bodyStyle.getPropertyValue('--color_dark');
+// State
+let currentHostname = "";
 
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-        // since only one tab should be active and in the current window at once
-        // the return variable should only have one entry
-        var activeTab = tabs[0];
+// Initialize
+document.addEventListener("DOMContentLoaded", async () => {
+    // 1. Get Current Tab
+    const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+    const activeTab = tabs[0];
 
-        if (!activeTab || !activeTab.url) return;
+    if (activeTab && activeTab.url && activeTab.url.startsWith("http")) {
+        currentHostname = new URL(activeTab.url).hostname;
+        elements.currentDomain.textContent = currentHostname;
+    } else {
+        elements.currentDomain.textContent = "System Page";
+        disableSiteControls();
+    }
 
-        // Disabled on internal pages
-        if (!activeTab.url.startsWith("http://") && !activeTab.url.startsWith("https://")
-        ) {
-            toggleSiteBtn.style.display = "none";
-            return;
+    // 2. Load Settings
+    loadSettings();
+
+    // 3. Listeners
+    setupListeners();
+});
+
+function disableSiteControls() {
+    elements.btnAllow.disabled = true;
+    elements.btnBlock.disabled = true;
+    elements.btnAllow.style.opacity = "0.5";
+    elements.btnBlock.style.opacity = "0.5";
+}
+
+async function loadSettings() {
+    const data = await chrome.storage.sync.get({
+        extensionEnabled: true,
+        siteSettings: {}
+    });
+
+    // Master Switch
+    elements.toggleExtension.checked = data.extensionEnabled;
+
+    // Site Buttons
+    if (currentHostname) {
+        const setting = data.siteSettings[currentHostname]; // "allow" | "block" | undefined
+        updateButtonStates(setting);
+    }
+}
+
+function updateButtonStates(setting) {
+    // Reset classes
+    elements.btnAllow.classList.remove("active-allow");
+    elements.btnBlock.classList.remove("active-block");
+
+    if (setting === "allow") {
+        elements.btnAllow.classList.add("active-allow");
+    } else if (setting === "block") {
+        elements.btnBlock.classList.add("active-block");
+    }
+}
+
+function setupListeners() {
+    // Master Switch
+    elements.toggleExtension.addEventListener("change", (e) => {
+        chrome.storage.sync.set({ extensionEnabled: e.target.checked });
+    });
+
+    // Allow Button
+    elements.btnAllow.addEventListener("click", async () => {
+        if (!currentHostname) return;
+
+        const data = await chrome.storage.sync.get({ siteSettings: {} });
+        const currentSetting = data.siteSettings[currentHostname];
+
+        let newSettings = { ...data.siteSettings };
+
+        if (currentSetting === "allow") {
+            // Toggle OFF (remove setting)
+            delete newSettings[currentHostname];
+            updateButtonStates(undefined);
+        } else {
+            // Set to ALLOW
+            newSettings[currentHostname] = "allow";
+            updateButtonStates("allow");
         }
 
-        const hostname = new URL(activeTab.url).hostname;
-        const isWhitelisted = data.whitelist.some((d) => hostname.endsWith(d));
-        currentDomainBtn.textContent = hostname;
-        toggleSiteBtn.textContent = isWhitelisted ? "Remove from Whitelist" : "Add to Whitelist";
+        await chrome.storage.sync.set({ siteSettings: newSettings });
     });
-});
 
-// Toggle site
-toggleSiteBtn.addEventListener("click", () => {
-    chrome.storage.sync.get({ whitelist: [] }, (data) => {
-        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-            var activeTab = tabs[0];
+    // Block Button
+    elements.btnBlock.addEventListener("click", async () => {
+        if (!currentHostname) return;
 
-            if (!activeTab || !activeTab.url) return;
-            const hostname = new URL(activeTab.url).hostname;
-            let whitelist = data.whitelist;
+        const data = await chrome.storage.sync.get({ siteSettings: {} });
+        const currentSetting = data.siteSettings[currentHostname];
 
-            let added;
-            if (whitelist.some((d) => hostname.endsWith(d))) {
-                whitelist = whitelist.filter((d) => !hostname.endsWith(d));
-                toggleSiteBtn.textContent = "Add to Whitelist";
-                added = false;
-            } else {
-                whitelist.push(hostname);
-                toggleSiteBtn.textContent = "Remove from Whitelist";
-                added = true;
-            }
+        let newSettings = { ...data.siteSettings };
 
-            chrome.storage.sync.set({ whitelist }, () => {
-                // Flash a color briefly to indicate change
-                toggleSiteBtn.style.backgroundColor = added
-                    ? bodyStyle.getPropertyValue('--color_secondary') // green if added
-                    : bodyStyle.getPropertyValue('--color_danger');   // red if removed
-                setTimeout(() => {
-                    toggleSiteBtn.style.backgroundColor = bodyStyle.getPropertyValue('--color_primary');
-                }, 400);
-            });
-        });
+        if (currentSetting === "block") {
+            // Toggle OFF (remove setting)
+            delete newSettings[currentHostname];
+            updateButtonStates(undefined);
+        } else {
+            // Set to BLOCK
+            newSettings[currentHostname] = "block";
+            updateButtonStates("block");
+        }
+
+        await chrome.storage.sync.set({ siteSettings: newSettings });
     });
-});
 
-// Toggle global enable/disable
-toggleGlobalBtn.addEventListener("click", () => {
-    chrome.storage.sync.get({ autoplayStopperEnabled: true }, (data) => {
-        const newState = !data.autoplayStopperEnabled;
-        chrome.storage.sync.set({ autoplayStopperEnabled: newState }, () => {
-            toggleGlobalBtn.textContent = newState ? "Globally Enabled" : "Globally Disabled";
-            toggleGlobalBtn.style.backgroundColor = newState
-                ? bodyStyle.getPropertyValue('--color_primary')
-                : bodyStyle.getPropertyValue('--color_dark');
-        });
+    // Options
+    elements.openOptions.addEventListener("click", () => {
+        chrome.runtime.openOptionsPage();
     });
-});
-
-// Open options page
-openOptionsBtn.addEventListener("click", () => {
-    chrome.runtime.openOptionsPage();
-});
+}

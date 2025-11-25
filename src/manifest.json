@@ -35,7 +35,7 @@
             }
         ]
     },
-    "description": "Blocks unwanted media autoplay on websites, with per-site whitelist control.",
+    "description": "Blocks unwanted media autoplay on websites, with per-site permission control.",
     "host_permissions": [
         "http://*/*",
         "https://*/*"

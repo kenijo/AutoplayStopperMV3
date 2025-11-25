@@ -1,24 +1,38 @@
 <!DOCTYPE html>
 <html>
 
-    <head>
-        <meta charset="utf-8">
-        <title>AutoplayStopper Menu</title>
-        <link rel="stylesheet" href="popup.css">
-    </head>
+<head>
+    <meta charset="utf-8">
+    <title>AutoplayStopper Menu</title>
+    <link rel="stylesheet" href="../common.css">
+    <link rel="stylesheet" href="popup.css">
+</head>
 
-    <body>
-        <div class="popup-container">
+<body>
+    <div class="popup-container">
+        <div class="header">
             <h1>AutoplayStopper</h1>
-
-            <p id="currentDomain"></p>
-
-            <button id="toggleSite">&nbsp;</button>
-            <button id="toggleGlobal"></button>
-            <button id="openOptions">Options</button>
+            <label class="switch">
+                <input type="checkbox" id="toggleExtension">
+                <span class="slider round"></span>
+            </label>
         </div>
 
-        <script src="popup.js"></script>
-    </body>
+        <div class="site-info">
+            <p id="currentDomain">...</p>
+        </div>
+
+        <div class="controls">
+            <button id="btnAllow" class="btn btn-choice">Always Allow</button>
+            <button id="btnBlock" class="btn btn-choice">Always Block</button>
+        </div>
+
+        <div class="controls">
+            <button id="openOptions" class="btn btn-choice">Options</button>
+        </div>
+    </div>
+
+    <script src="popup.js"></script>
+</body>
 
 </html>
