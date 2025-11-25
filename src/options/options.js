@@ -4,14 +4,14 @@
 
 // DOM Elements
 const elements = {
-    globalBehavior: document.getElementById("globalBehavior"),
     addButton: document.getElementById("addDomain"),
     domainInput: document.getElementById("domainInput"),
-    newDomainStatus: document.getElementById("newDomainStatus"),
     domainList: document.getElementById("domainList"),
     exportBtn: document.getElementById("exportBtn"),
+    globalBehavior: document.getElementById("globalBehavior"),
     importBtn: document.getElementById("importBtn"),
     importFile: document.getElementById("importFile"),
+    newDomainStatus: document.getElementById("newDomainStatus"),
     resetBtn: document.getElementById("resetBtn"),
     searchInput: document.getElementById("searchInput")
 };
