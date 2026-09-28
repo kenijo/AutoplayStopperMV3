@@ -1,4 +1,4 @@
-## The development of this extension has stopped since Manifest V3 from web browser extension highly limits control capabilities, and I haven't found a way to reliably stop video autoplay. Chromium based alternative browsers such as [Brave](https://brave.com), [Edge](https://www.microsoft.com/edge), [Vivaldi](https://vivaldi.com), or [Firefox](https://www.firefox.com) support autoplay blocking natively.
+**The development of this extension has stopped since Manifest V3 from web browser extension highly limits control capabilities, and I haven't found a way to reliably stop video autoplay. Chromium based alternative browsers such as [Brave](https://brave.com), [Edge](https://www.microsoft.com/edge), [Vivaldi](https://vivaldi.com), or [Firefox](https://www.firefox.com) support autoplay blocking natively.**
 
 # [AutoplayStopper (MV3)](https://chromewebstore.google.com/detail/autoplaystopper-mv3/gcendpekmacfohmhhkbhejjfbepkkkib)
 
